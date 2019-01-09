@@ -27,10 +27,10 @@ public class TestSimulator
     }
 
     public void testGeneSimulation() {
-        World1SimulatorApplication simulator = World1SimulatorApplication.builder().scenarioTimeMs(100000000).build();
+        World1SimulatorApplication simulator = World1SimulatorApplication.builder().scenarioTimeMs(10000000).build();
         SortedMap<Double, GeneMap> result = simulator.runAnalysisUntilStable(new TestBrainFactory());
         GeneParameterValue bestTestParam = (GeneParameterValue) result.get(result.firstKey()).genes.get(MOVESPEEDPARAM);
-        assertEquals(.5f, bestTestParam.getValue(), .01);
+        assertEquals(.5f, bestTestParam.getValue(), .05);
     }
 
 
@@ -42,7 +42,7 @@ public class TestSimulator
             super(time);
             moveParam = ((GeneParameterValue) geneMap.genes.get(MOVESPEEDPARAM)).getValue();
             stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
-            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10000);
+            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 100000);
         }
 
         private void moveUntilNextToFood(Time time) {

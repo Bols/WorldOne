@@ -23,6 +23,7 @@ public class Time {
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
+        long startClockTime = System.currentTimeMillis();
         while (!stopCriteria.test(this)) {
             for (int i = 0; i <= 100; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.first();
@@ -34,7 +35,7 @@ public class Time {
             }
         }
 
-        System.out.println("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMicroSeconds / 1000000f));
+        System.out.println("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMicroSeconds / 1000000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
     }
 
 
