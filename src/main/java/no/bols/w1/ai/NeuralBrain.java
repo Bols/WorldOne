@@ -7,13 +7,15 @@ import no.bols.w1.physics.Time;
 
 public class NeuralBrain extends Brain {
     final BrainGeneWrapper genes;
+    private final Neuron singleNeuron;
 
-    private Neuron singleNeuron = new Neuron(time);
 
-    public NeuralBrain(Time time, GeneMap genes) {
+    public NeuralBrain(Time time, GeneMap geneMap) {
         super(time);
-        this.genes = new BrainGeneWrapper(genes);
+        this.genes = new BrainGeneWrapper(geneMap);
+        singleNeuron = new Neuron(time, genes);
         time.scheduleRecurringEvent(t -> singleNeuron.fireInputInverse(oneleg.getFoodDistanceOutput()), 10);
+
     }
 
 

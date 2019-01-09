@@ -24,7 +24,7 @@ public class World {
 
     public double score() {
         double eaten = foodEaten + (1 - currentFood.getFoodAmount());
-        double moveAmount = oneleg.getPosition() / 1000;
+        double moveAmount = oneleg.getPosition() / 100.0;
         return eaten + (moveAmount > 1.0 ? 1.0 : moveAmount);
     }
 

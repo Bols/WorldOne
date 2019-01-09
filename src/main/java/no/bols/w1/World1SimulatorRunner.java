@@ -29,20 +29,23 @@ public class World1SimulatorRunner {
         while (topScoreUnchangedNum < 20) {
 
             List<GeneMap> topList = results.values().stream().limit(16).collect(Collectors.toList());
-            Iterator<GeneMap> topGenesIterator = topList.iterator();
+
             Set<GeneMap> newCandidates = new HashSet<>();
-            for (int i = 0; i < topList.size() / 2; i++) {
-                GeneMap parent1 = topGenesIterator.next();
-                GeneMap parent2 = topGenesIterator.next();
+            newCandidates.add(topList.get(0).breed(topList.get(1)));
+            topList.forEach(parent1 ->
+            {
+                GeneMap parent2 = topList.get(new Random().nextInt(16));
                 GeneMap offspring = parent1.breed(parent2);
                 newCandidates.add(offspring);
-            }
+            });
             simulateCandidatesAndAddToResults(brainFactory, executorService, newCandidates, results);
             if (topScore < results.firstKey()) {
                 topScore = results.firstKey();
                 topScoreUnchangedNum = 0;
+                System.out.println("\nNew best score " + topScore + " - " + results.get(results.firstKey()).toString());
             } else {
                 topScoreUnchangedNum++;
+                //System.out.print("#");
             }
         }
         System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). Best score " + results.firstKey() + " - " + results.get(results.firstKey()));
@@ -75,10 +78,11 @@ public class World1SimulatorRunner {
 
         @Override
         public Pair<Double, GeneMap> call() {
-            System.out.println("Running scenario " + genes.toString());
+            //System.out.println("Running scenario " + genes.toString());
             Time time = new Time();
             World world = new World(time, brainFactory.createBrain(time, genes));
             time.runUntil(t -> world.getTime().getTimeMilliSeconds() > scenarioTimeMs);
+            System.out.print("Score " + world.score() + ", genes " + genes.toString() + "\n");
             return new Pair<>(world.score(), genes);
         }
 
@@ -87,7 +91,7 @@ public class World1SimulatorRunner {
 
     private Set<GeneMap> initializeInitialBrainGenes(BrainFactory brainFactory) {
         HashSet<GeneMap> ret = new HashSet<>();
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 64; i++) {
             ret.add(brainFactory.randomGenes());
         }
         return ret;
