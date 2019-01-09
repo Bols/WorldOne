@@ -2,24 +2,24 @@ package no.bols.w1.physics;//
 
 public class Oneleg extends PhysObject {
 
-    private static float MAX_SPEED = 1; //positions pr. second
-    private static float EAT_SPEED = 1; //amount pr second
+    private static double MAX_SPEED = 1; //positions pr. second
+    private static double EAT_SPEED = 1; //amount pr second
     private Brain brain;
     private long lastPositionTime = 0;
-    private float lastMotorOutput;
+    private double lastMotorOutput;
 
-    public Oneleg(World world, Brain brain, float position) {
+    public Oneleg(World world, Brain brain, double position) {
         super(position, world);
         this.brain = brain;
         brain.setOneleg(this);
     }
 
-    public float getFoodDistanceOutput() {
+    public double getFoodDistanceOutput() {
         updateState();
         return distance(world.getCurrentFood());
     }
 
-    public void motorOutput(float output) {
+    public void motorOutput(double output) {
         if (output > 1.0) {
             throw new RuntimeException("Motor output=" + output);
         }
@@ -30,11 +30,11 @@ public class Oneleg extends PhysObject {
 
 
     private void updateState() {
-        long newTimeMs = world.getTime().getTimeMicroSeconds();
+        long newTimeMs = world.getTime().getTimeMilliSeconds();
         long diffTimeMs = newTimeMs - lastPositionTime;
-        position = position + (lastMotorOutput * MAX_SPEED * diffTimeMs / 1000000);
+        position = position + (lastMotorOutput * MAX_SPEED * diffTimeMs / 1000);
         if (canEat()) {
-            world.getCurrentFood().eat(EAT_SPEED * diffTimeMs / 1000000);
+            world.getCurrentFood().eat(EAT_SPEED * diffTimeMs / 1000);
         }
 
         lastPositionTime = newTimeMs;

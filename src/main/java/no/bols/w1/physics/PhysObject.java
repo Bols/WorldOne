@@ -5,15 +5,15 @@ import lombok.Getter;
 
 public class PhysObject {
     @Getter
-    protected float position;
+    protected double position;
     protected World world;
 
-    public PhysObject(float position, World world) {
+    public PhysObject(double position, World world) {
         this.position = position;
         this.world = world;
     }
 
-    public float distance(PhysObject obj) {
+    public double distance(PhysObject obj) {
         return Math.abs(obj.getPosition() - getPosition());
     }
 

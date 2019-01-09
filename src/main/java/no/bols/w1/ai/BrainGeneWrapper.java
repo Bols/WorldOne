@@ -10,7 +10,7 @@ public class BrainGeneWrapper {
     public static final String EXHIBITION_FACTOR = "EXHIBITION_FACTOR";
     @Getter
     protected GeneMap geneMap;
-    private float exhibitionFactor;
+    private double exhibitionFactor;
 
     public BrainGeneWrapper(GeneMap geneMap) {
         this.geneMap = geneMap;

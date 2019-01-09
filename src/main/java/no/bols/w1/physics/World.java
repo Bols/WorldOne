@@ -7,7 +7,7 @@ public class World {
     final Oneleg oneleg;
 
     int foodEaten = 0;
-    float lastFoodPosition = 0;
+    double lastFoodPosition = 0;
 
     @Getter
     private final Time time;
@@ -23,8 +23,8 @@ public class World {
     }
 
     public double score() {
-        float eaten = foodEaten + (1 - currentFood.getFoodAmount());
-        float moveAmount = oneleg.getPosition() / 1000;
+        double eaten = foodEaten + (1 - currentFood.getFoodAmount());
+        double moveAmount = oneleg.getPosition() / 1000;
         return eaten + (moveAmount > 1.0 ? 1.0 : moveAmount);
     }
 
@@ -35,7 +35,7 @@ public class World {
     }
 
     private void placeFood() {
-        float newPosition = lastFoodPosition + 10;
+        double newPosition = lastFoodPosition + 10;
         this.currentFood = new Food(newPosition, this);
         lastFoodPosition = newPosition;
     }

@@ -5,9 +5,9 @@ import lombok.Getter;
 
 public class Food extends PhysObject {
     @Getter
-    private float foodAmount = 1.0f;
+    private double foodAmount = 1.0;
 
-    public Food(float position, World world) {
+    public Food(double position, World world) {
         super(position, world);
     }
 
@@ -15,7 +15,7 @@ public class Food extends PhysObject {
         return foodAmount <= 0;
     }
 
-    public void eat(float amount) {
+    public void eat(double amount) {
         if (foodAmount < 0) {
             throw new RuntimeException("empty food");
         }

@@ -8,18 +8,18 @@ import java.util.Random;
 public class GeneParameterValue extends Gene {
 
 
-    private final float min;
-    private final float max;
+    private final double min;
+    private final double max;
     @Getter
-    private final float value;
+    private final double value;
 
-    public GeneParameterValue(float min, float max) {
+    public GeneParameterValue(double min, double max) {
         this.min = min;
         this.max = max;
         this.value = new Random().nextFloat() * (max - min) + min;
     }
 
-    public GeneParameterValue(float min, float max, float childVal) {
+    public GeneParameterValue(double min, double max, double childVal) {
         this.min = min;
         this.max = max;
         this.value = childVal;
@@ -28,9 +28,9 @@ public class GeneParameterValue extends Gene {
     @Override
     public GeneParameterValue breed(Gene other) {
         GeneParameterValue otherValue = (GeneParameterValue) other;
-        boolean mutation = new Random().nextFloat() < MUTATION_CHANCE;
+        boolean mutation = new Random().nextDouble() < MUTATION_CHANCE;
         if (!mutation) {
-            float childVal = new Random().nextFloat() * (Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue())) + Math.min(value, otherValue.getValue());
+            double childVal = new Random().nextDouble() * (Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue())) + Math.min(value, otherValue.getValue());
             return new GeneParameterValue(min, max, childVal);
         } else {
             return new GeneParameterValue(min, max);

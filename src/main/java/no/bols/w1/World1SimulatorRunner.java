@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 
 @Builder
-public class World1SimulatorApplication {
-    private int scenarioTimeMs = 100000000;
+public class World1SimulatorRunner {
+    private int scenarioTimeMs = 100000;
 
     public SortedMap<Double, GeneMap> runAnalysisUntilStable(BrainFactory brainFactory) {
         long startTime = System.currentTimeMillis();
@@ -78,14 +78,14 @@ public class World1SimulatorApplication {
             System.out.println("Running scenario " + genes.toString());
             Time time = new Time();
             World world = new World(time, brainFactory.createBrain(time, genes));
-            time.runUntil(t -> world.getTime().getTimeMicroSeconds() > scenarioTimeMs);
+            time.runUntil(t -> world.getTime().getTimeMilliSeconds() > scenarioTimeMs);
             return new Pair<>(world.score(), genes);
         }
 
 
     }
 
-    public Set<GeneMap> initializeInitialBrainGenes(BrainFactory brainFactory) {
+    private Set<GeneMap> initializeInitialBrainGenes(BrainFactory brainFactory) {
         HashSet<GeneMap> ret = new HashSet<>();
         for (int i = 0; i < 16; i++) {
             ret.add(brainFactory.randomGenes());

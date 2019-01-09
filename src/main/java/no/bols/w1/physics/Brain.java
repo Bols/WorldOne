@@ -8,7 +8,7 @@ public class Brain {
     @Setter
     protected Oneleg oneleg;
 
-    private Time time;
+    protected Time time;
 
     public Brain(Time time) {
         this.time = time;

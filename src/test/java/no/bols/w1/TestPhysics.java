@@ -39,9 +39,9 @@ public class TestPhysics
 
         private void moveUntilNextToFood(Time time) {
             if (oneleg.getFoodDistanceOutput() > .1) {
-                oneleg.motorOutput(1.0f);
+                oneleg.motorOutput(1.0);
             } else {
-                oneleg.motorOutput(0.0f);
+                oneleg.motorOutput(0.0);
             }
         }
 

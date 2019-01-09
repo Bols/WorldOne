@@ -10,32 +10,35 @@ import java.util.function.Predicate;
 
 public class Time {
     @Getter
-    private long timeMicroSeconds = 0;
+    private long timeMilliSeconds = 0;
     private TreeSet<Event> scheduledEvents = new TreeSet<Event>();
     int eventsHandled = 0;
 
     public void scheduleEvent(Consumer<Time> eventHandler, long timeOffsetMicroSeconds) {
-        scheduledEvents.add(new Event(eventHandler, getTimeMicroSeconds() + timeOffsetMicroSeconds));
+        scheduledEvents.add(new Event(eventHandler, getTimeMilliSeconds() + timeOffsetMicroSeconds));
     }
 
-    public void scheduleRecurringEvent(Consumer<Time> eventHandler, long intervalMicroSeconds) {
-        scheduledEvents.add(new RecurringEvent(eventHandler, getTimeMicroSeconds() + intervalMicroSeconds, intervalMicroSeconds));
+    public void scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
+        scheduledEvents.add(new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds));
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
         long startClockTime = System.currentTimeMillis();
+        if (scheduledEvents.isEmpty()) {
+            throw new RuntimeException("No scheduled events. Simulation not initialized");
+        }
         while (!stopCriteria.test(this)) {
             for (int i = 0; i <= 100; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.first();
                 scheduledEvents.remove(firstEvent);
-                timeMicroSeconds = firstEvent.timeOffsetMicroseconds;
+                timeMilliSeconds = firstEvent.timeOffsetMicroseconds;
                 firstEvent.eventHandler.accept(this);
                 firstEvent.afterEvent(this);
                 eventsHandled++;
             }
         }
 
-        System.out.println("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMicroSeconds / 1000000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
+        System.out.println("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMilliSeconds / 1000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
     }
 
 
