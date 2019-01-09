@@ -1,4 +1,4 @@
-package no.bols.w1;//
+package no.bols.w1.physics;//
 //
 
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ public class Time {
     @Getter
     private long timeMicroSeconds = 0;
     private TreeSet<Event> scheduledEvents = new TreeSet<Event>();
-
+    int eventsHandled = 0;
 
     public void scheduleEvent(Consumer<Time> eventHandler, long timeOffsetMicroSeconds) {
         scheduledEvents.add(new Event(eventHandler, getTimeMicroSeconds() + timeOffsetMicroSeconds));
@@ -30,9 +30,11 @@ public class Time {
                 timeMicroSeconds = firstEvent.timeOffsetMicroseconds;
                 firstEvent.eventHandler.accept(this);
                 firstEvent.afterEvent(this);
+                eventsHandled++;
             }
         }
-        System.out.println("Finished at " + timeMicroSeconds);
+
+        System.out.println("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMicroSeconds / 1000000f));
     }
 
 

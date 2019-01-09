@@ -1,4 +1,4 @@
-package no.bols.w1;//
+package no.bols.w1.physics;//
 //
 
 import lombok.Getter;

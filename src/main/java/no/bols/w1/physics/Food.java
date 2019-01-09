@@ -1,4 +1,4 @@
-package no.bols.w1;//
+package no.bols.w1.physics;//
 //
 
 import lombok.Getter;
@@ -17,8 +17,11 @@ public class Food extends PhysObject {
 
     public void eat(float amount) {
         if (foodAmount < 0) {
-            throw new RuntimeException("no food");
+            throw new RuntimeException("empty food");
         }
         foodAmount = foodAmount - amount;
+        if (foodAmount < 0) {
+            world.foodEaten(this);
+        }
     }
 }

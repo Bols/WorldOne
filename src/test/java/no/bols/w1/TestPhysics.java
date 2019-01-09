@@ -3,6 +3,10 @@ package no.bols.w1;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import no.bols.w1.physics.Brain;
+import no.bols.w1.physics.Food;
+import no.bols.w1.physics.Time;
+import no.bols.w1.physics.World;
 
 /**
  * Unit test for simple App.
@@ -20,8 +24,10 @@ public class TestPhysics
     public void testPhysics() {
         Time time = new Time();
         World world = new World(time, new SteadySpeedBrain(time));
-        time.runUntil(t -> world.getCurrentFood().eaten());
-
+        Food startFood = world.getCurrentFood();
+        time.runUntil(t -> {
+            return startFood.eaten();
+        });
     }
 
 

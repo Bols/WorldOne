@@ -1,4 +1,4 @@
-package no.bols.w1;//
+package no.bols.w1.physics;//
 
 public class Oneleg extends PhysObject {
 
@@ -14,7 +14,7 @@ public class Oneleg extends PhysObject {
         brain.setOneleg(this);
     }
 
-    float getFoodDistanceOutput() {
+    public float getFoodDistanceOutput() {
         updateState();
         return distance(world.getCurrentFood());
     }
@@ -28,10 +28,6 @@ public class Oneleg extends PhysObject {
 
     }
 
-    public float getPositionOutput() {
-        updateState();
-        return position;
-    }
 
     private void updateState() {
         long newTimeMs = world.getTime().getTimeMicroSeconds();
