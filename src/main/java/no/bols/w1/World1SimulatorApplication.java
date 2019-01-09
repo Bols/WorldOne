@@ -1,5 +1,6 @@
 package no.bols.w1;
 
+import lombok.Builder;
 import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
@@ -8,10 +9,10 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-/**
- * Hello world!
- */
+
+@Builder
 public class World1SimulatorApplication {
+    private int scenarioTimeMs = 100000000;
 
     public SortedMap<Double, GeneMap> runAnalysisUntilStable(BrainFactory brainFactory) {
         Set<GeneMap> candidates = initializeInitialBrainGenes(brainFactory);
@@ -22,12 +23,13 @@ public class World1SimulatorApplication {
         });
         int topScoreUnchangedNum = 0;
         Double topScore = 0.0;
-        while (topScoreUnchangedNum < 3) {
+        while (topScoreUnchangedNum < 10) {
 
-            Iterator<GeneMap> topGenes = results.values().stream().limit(10).collect(Collectors.toList()).iterator();
-            for (int i = 0; i < 5; i++) {
-                GeneMap parent1 = topGenes.next();
-                GeneMap parent2 = topGenes.next();
+            List<GeneMap> topList = results.values().stream().limit(10).collect(Collectors.toList());
+            Iterator<GeneMap> topGenesIterator = topList.iterator();
+            for (int i = 0; i < topList.size() / 2; i++) {
+                GeneMap parent1 = topGenesIterator.next();
+                GeneMap parent2 = topGenesIterator.next();
                 GeneMap offspring = parent1.breed(parent2);
                 Double score = new SimulatorCallable(brainFactory, offspring).call();
                 results.put(score, offspring);
@@ -40,11 +42,12 @@ public class World1SimulatorApplication {
                 topScoreUnchangedNum++;
             }
         }
+        System.out.println("Stable result - best score " + results.firstKey() + " - " + results.get(results.firstKey()));
         return results;
     }
 
 
-    public static class SimulatorCallable implements Callable<Double> {
+    public class SimulatorCallable implements Callable<Double> {
         private BrainFactory brainFactory;
         private GeneMap genes;
 
@@ -58,7 +61,7 @@ public class World1SimulatorApplication {
             System.out.println("Running scenario " + genes.toString());
             Time time = new Time();
             World world = new World(time, brainFactory.createBrain(time, genes));
-            time.runUntil(t -> world.getTime().getTimeMicroSeconds() > 100000000);
+            time.runUntil(t -> world.getTime().getTimeMicroSeconds() > scenarioTimeMs);
             System.out.println("Score " + world.score());
             return world.score();
         }

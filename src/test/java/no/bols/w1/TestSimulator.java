@@ -15,7 +15,8 @@ import java.util.SortedMap;
  */
 public class TestSimulator
         extends TestCase {
-    public static final String TESTPARAM = "testparam";
+    public static final String MOVESPEEDPARAM = "moveparam";
+    public static final String STOPDISTANCEPARAM = "stopdistance";
 
     public TestSimulator(String testName) {
         super(testName);
@@ -26,34 +27,37 @@ public class TestSimulator
     }
 
     public void testGeneSimulation() {
-        SortedMap<Double, GeneMap> result = new World1SimulatorApplication().runAnalysisUntilStable(new TestBrainFactory());
-        GeneParameterValue bestTestParam = (GeneParameterValue) result.get(result.firstKey()).genes.get(TESTPARAM);
-        assertEquals(.5f, bestTestParam.getValue(), .001);
+        World1SimulatorApplication simulator = World1SimulatorApplication.builder().scenarioTimeMs(100000000).build();
+        SortedMap<Double, GeneMap> result = simulator.runAnalysisUntilStable(new TestBrainFactory());
+        GeneParameterValue bestTestParam = (GeneParameterValue) result.get(result.firstKey()).genes.get(MOVESPEEDPARAM);
+        assertEquals(.5f, bestTestParam.getValue(), .01);
     }
 
 
     private class TestGenedBrain extends Brain {
-        private final float testParam;
+        private final float moveParam;
+        private final float stopDistanceParam;
 
         public TestGenedBrain(Time time, GeneMap geneMap) {
             super(time);
-            testParam = ((GeneParameterValue) geneMap.genes.get(TESTPARAM)).getValue();
-            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
+            moveParam = ((GeneParameterValue) geneMap.genes.get(MOVESPEEDPARAM)).getValue();
+            stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
+            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10000);
         }
 
         private void moveUntilNextToFood(Time time) {
-            if (oneleg.getFoodDistanceOutput() > .1) {
-                oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtTestParamHalf());
+            if (oneleg.getFoodDistanceOutput() > stopDistanceParam) {
+                oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf());
             } else {
                 oneleg.motorOutput(0.0f);
             }
         }
 
-        private float calculateOutputWithMaxValueAchievedAtTestParamHalf() {
-          /*  if(testParam<.3 || testParam>.7){
+        private float calculateOutputWithMaxValueAchievedAtMoveParamHalf() {
+            if (moveParam < .3 || moveParam > .7) {
                 return 0;
-            }*/
-            return Math.max(0, 1 - Math.abs(testParam - .5f));
+            }
+            return Math.max(0, 1 - Math.abs(moveParam - .5f));
         }
     }
 
@@ -68,7 +72,9 @@ public class TestSimulator
         @Override
         public GeneMap randomGenes() {
             GeneMap geneMap = new GeneMap();
-            geneMap.genes.put(TESTPARAM, new GeneParameterValue(0, 1));
+            geneMap.genes.put(MOVESPEEDPARAM, new GeneParameterValue(0, 1));
+            geneMap.genes.put(STOPDISTANCEPARAM, new GeneParameterValue(0, 1));
+
             return geneMap;
         }
     }
