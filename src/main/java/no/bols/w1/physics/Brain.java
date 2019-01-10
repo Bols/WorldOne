@@ -4,7 +4,7 @@ package no.bols.w1.physics;//
 import lombok.Setter;
 
 
-public class Brain {
+public abstract class Brain {
     @Setter
     protected Oneleg oneleg;
 
@@ -15,4 +15,5 @@ public class Brain {
     }
 
 
+    public abstract void initalizeTime();
 }

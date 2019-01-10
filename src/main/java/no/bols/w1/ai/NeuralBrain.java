@@ -14,9 +14,11 @@ public class NeuralBrain extends Brain {
         super(time);
         this.genes = new BrainGeneWrapper(geneMap);
         singleNeuron = new Neuron(time, genes);
-        time.scheduleRecurringEvent(t -> singleNeuron.fireInputInverse(oneleg.getFoodDistanceOutput()), 10);
-
     }
 
 
+    @Override
+    public void initalizeTime() {
+        time.scheduleRecurringEvent(t -> singleNeuron.fireInputInverse(oneleg.getFoodDistanceOutput()), 10);
+    }
 }

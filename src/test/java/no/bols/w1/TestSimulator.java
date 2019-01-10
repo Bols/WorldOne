@@ -1,5 +1,6 @@
 package no.bols.w1;
 
+import javafx.util.Pair;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -8,7 +9,7 @@ import no.bols.w1.genes.GeneParameterValue;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
-import java.util.SortedMap;
+import java.util.List;
 
 /**
  * Unit test for simple App.
@@ -27,9 +28,10 @@ public class TestSimulator
     }
 
     public void testGeneSimulation() {
-        World1SimulatorRunner simulator = World1SimulatorRunner.builder().scenarioTimeMs(25000).build();
-        SortedMap<Double, GeneMap> result = simulator.runAnalysisUntilStable(new TestBrainFactory());
-        GeneParameterValue bestTestParam = (GeneParameterValue) result.get(result.firstKey()).genes.get(MOVESPEEDPARAM);
+        World1SimulatorRunner simulator = World1SimulatorRunner.builder()
+                .scenarioTimeMs(25000).build();
+        List<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new TestBrainFactory());
+        GeneParameterValue bestTestParam = (GeneParameterValue) result.get(0).getValue().genes.get(MOVESPEEDPARAM);
         assertEquals(.5f, bestTestParam.getValue(), .05);
     }
 
@@ -42,7 +44,6 @@ public class TestSimulator
             super(time);
             moveParam = ((GeneParameterValue) geneMap.genes.get(MOVESPEEDPARAM)).getValue();
             stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
-            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
         }
 
         private void moveUntilNextToFood(Time time) {
@@ -58,6 +59,11 @@ public class TestSimulator
                 return 0;
             }
             return Math.max(0, 1 - Math.abs(moveParam - .5));
+        }
+
+        @Override
+        public void initalizeTime() {
+            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
         }
     }
 

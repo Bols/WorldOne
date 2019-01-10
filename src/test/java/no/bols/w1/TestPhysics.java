@@ -34,6 +34,10 @@ public class TestPhysics
     private class SteadySpeedBrain extends Brain {
         public SteadySpeedBrain(Time time) {
             super(time);
+        }
+
+        @Override
+        public void initalizeTime() {
             time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
         }
 

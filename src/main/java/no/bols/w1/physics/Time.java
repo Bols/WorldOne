@@ -4,15 +4,19 @@ package no.bols.w1.physics;//
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.TreeSet;
+import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Time {
     @Getter
-    private long timeMilliSeconds = 0;
-    private TreeSet<Event> scheduledEvents = new TreeSet<Event>();
-    int eventsHandled = 0;
+    private long timeMilliSeconds;
+    private PriorityQueue<Event> scheduledEvents;
+    int eventsHandled;
+
+    public Time() {
+        reset();
+    }
 
     public void scheduleEvent(Consumer<Time> eventHandler, long timeOffsetMilliseconds) {
         scheduledEvents.add(new Event(eventHandler, getTimeMilliSeconds() + timeOffsetMilliseconds));
@@ -29,8 +33,7 @@ public class Time {
         }
         while (!stopCriteria.test(this)) {
             for (int i = 0; i <= 100; i++) {  //replace with thread
-                Event firstEvent = scheduledEvents.first();
-                scheduledEvents.remove(firstEvent);
+                Event firstEvent = scheduledEvents.remove();
                 timeMilliSeconds = firstEvent.timeOffsetMilliSeconds;
                 firstEvent.eventHandler.accept(this);
                 firstEvent.afterEvent(this);
@@ -39,6 +42,12 @@ public class Time {
         }
 
         //System.out.print("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMilliSeconds / 1000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
+    }
+
+    public void reset() {
+        timeMilliSeconds = 0;
+        scheduledEvents = new PriorityQueue<>();
+        eventsHandled = 0;
     }
 
 
