@@ -23,7 +23,9 @@ public class TestPhysics
 
     public void testPhysics() {
         Time time = new Time();
-        World world = new World(time, new SteadySpeedBrain(time));
+        SteadySpeedBrain brain = new SteadySpeedBrain(time);
+        brain.initalizeTime();
+        World world = new World(time, brain);
         Food startFood = world.getCurrentFood();
         time.runUntil(t -> {
             return startFood.eaten();
@@ -42,7 +44,7 @@ public class TestPhysics
         }
 
         private void moveUntilNextToFood(Time time) {
-            if (oneleg.getFoodDistanceOutput() > .1) {
+            if (oneleg.getFoodDistanceOutput() > .01) {
                 oneleg.motorOutput(1.0);
             } else {
                 oneleg.motorOutput(0.0);
