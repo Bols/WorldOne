@@ -36,7 +36,7 @@ public class GeneParameterValue extends Gene {
             double diff = Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue());
             double average = (value + otherValue.getValue()) / 2.0;
             if (minorMutation) {
-                return new GeneParameterValue(min, max, average + new Random().nextDouble() * MUTATION_CHANCE - (MUTATION_CHANCE / 2.0));
+                return new GeneParameterValue(min, max, average + new Random().nextDouble() * .02 - .01);
             } else {
                 double childVal = (new Random().nextDouble() * diff) - (diff / 2.0) + average;
                 return new GeneParameterValue(min, max, childVal);
