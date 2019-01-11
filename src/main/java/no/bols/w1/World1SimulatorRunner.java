@@ -1,24 +1,63 @@
 package no.bols.w1;
 
-import javafx.util.Pair;
+import io.jenetics.*;
+import io.jenetics.engine.Engine;
+import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
+import io.jenetics.stat.DoubleMomentStatistics;
+import io.jenetics.util.Factory;
 import lombok.Builder;
 import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
 
-import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
+
+import static io.jenetics.engine.Limits.bySteadyFitness;
 
 
 @Builder
 public class World1SimulatorRunner {
     private int scenarioTimeMs = 100000;
+    BrainFactory brainFactory;
 
-    public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable(BrainFactory brainFactory) {
+    private double eval(Genotype<DoubleGene> genotype) {
+        Time time = new Time();
+        Brain brain = brainFactory.createBrain(time, genotype);
+        return runScenarioTrainingUntilStable(time, brain);
+
+    }
+
+    public EvolutionResult<DoubleGene, Double> runGeneticAlgorithmUntilStable() {
+
+        Factory<Genotype<DoubleGene>> genotypeFactory = Genotype.of(
+                DoubleChromosome.of(0.0, 1.0),
+                DoubleChromosome.of(0.0, 1.0),
+                DoubleChromosome.of(0.0, 1.0)
+        );
+        Engine<DoubleGene, Double> engine = Engine.builder(f -> eval(f), genotypeFactory)
+                .selector(new EliteSelector<>(10))
+                .alterers(new GaussianMutator<>(.2))
+                .maximalPhenotypeAge(100000)
+                .build();
+        final EvolutionStatistics<Double, DoubleMomentStatistics> statistics =
+                EvolutionStatistics.ofNumber();
+        EvolutionResult<DoubleGene, Double> res = engine.stream()
+                .limit(bySteadyFitness(20))
+                .peek(statistics)
+                .parallel()
+                .collect(EvolutionResult.toBestEvolutionResult());
+        System.out.println(statistics.toString());
+        return res;
+
+    }
+
+
+
+
+   /* public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable(BrainFactory brainFactory) {
         long startTime = System.currentTimeMillis();
         int generations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool();
@@ -54,7 +93,8 @@ public class World1SimulatorRunner {
         System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). #Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
         return results;
     }
-
+*/
+/*
     private int compare(Pair<Double, GeneMap> e1, Pair<Double, GeneMap> e2) {
         int scoreCompare = e2.getKey().compareTo(e1.getKey());
         if (scoreCompare != 0)
@@ -77,30 +117,31 @@ public class World1SimulatorRunner {
             }
                         }).collect(Collectors.toList());
     }
+*/
 
 
-    public class SimulatorCallable implements Callable<Pair<Double, GeneMap>> {
-        private BrainFactory brainFactory;
-        private GeneMap genes;
+    /*  public class SimulatorCallable implements Callable<Pair<Double, GeneMap>> {
+          private BrainFactory brainFactory;
+          private GeneMap genes;
 
-        public SimulatorCallable(BrainFactory brainFactory, GeneMap genes) {
-            this.brainFactory = brainFactory;
-            this.genes = genes;
-        }
+          public SimulatorCallable(BrainFactory brainFactory, GeneMap genes) {
+              this.brainFactory = brainFactory;
+              this.genes = genes;
+          }
 
-        @Override
-        public Pair<Double, GeneMap> call() {
-            //System.out.println("Running scenario " + genes.toString());
-            Time time = new Time();
-            Brain brain = brainFactory.createBrain(time, genes);
-            Double score = runScenarioTrainingUntilStable(time, brain);
-            System.out.print("Score " + score + ", genes " + genes.toString() + "\n");
-            return new Pair<>(score, genes);
-        }
+          @Override
+          public Pair<Double, GeneMap> call() {
+              //System.out.println("Running scenario " + genes.toString());
+              Time time = new Time();
+              Brain brain = brainFactory.createBrain(time, genes);
+              Double score = runScenarioTrainingUntilStable(time, brain);
+              System.out.print("Score " + score + ", genes " + genes.toString() + "\n");
+              return new Pair<>(score, genes);
+          }
 
 
-    }
-
+      }
+  */
     private double runScenarioTrainingUntilStable(Time time, Brain brain) {
         double topScore = 0;
         double previousScore = 0;

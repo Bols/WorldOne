@@ -1,6 +1,9 @@
 package no.bols.w1;
 
-import javafx.util.Pair;
+import io.jenetics.DoubleGene;
+import io.jenetics.Genotype;
+import io.jenetics.Phenotype;
+import io.jenetics.engine.EvolutionResult;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -8,8 +11,6 @@ import no.bols.w1.genes.GeneMap;
 import no.bols.w1.genes.GeneParameterValue;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
-
-import java.util.SortedSet;
 
 /**
  * Unit test for simple App.
@@ -31,10 +32,14 @@ public class TestSimulator
 
     public void testGeneSimulation() {
         World1SimulatorRunner simulator = World1SimulatorRunner.builder()
-                .scenarioTimeMs(25000).build();
-        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new TestBrainFactory());
-        GeneParameterValue bestTestParam = (GeneParameterValue) result.first().getValue().genes.get(MOVESPEEDPARAM);
-        assertEquals(.5f, bestTestParam.getValue(), .05);
+                .scenarioTimeMs(25000)
+                .brainFactory(new TestBrainFactory())
+                .build();
+        EvolutionResult<DoubleGene, Double> result = simulator.runGeneticAlgorithmUntilStable();
+        Phenotype<DoubleGene, Double> bestPhenotype = result.getBestPhenotype();
+        System.out.println(result.getBestFitness() + " " + bestPhenotype.getGenotype().toString());
+
+        assertEquals(.5f, bestPhenotype.getGenotype().getChromosome(0).getGene().doubleValue(), .05);
     }
 
 
@@ -43,12 +48,11 @@ public class TestSimulator
         private final double stopDistanceParam;
         private final double stopSpeedParam;
 
-        public TestGenedBrain(Time time, GeneMap geneMap) {
+        public TestGenedBrain(Time time, Genotype<DoubleGene> geneMap) {
             super(time);
-            moveParam = ((GeneParameterValue) geneMap.genes.get(MOVESPEEDPARAM)).getValue();
-            stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
-            stopSpeedParam = ((GeneParameterValue) geneMap.genes.get(STOPSPEEDPARAM)).getValue();
-
+            moveParam = geneMap.get(0).getGene().doubleValue();
+            stopDistanceParam = geneMap.get(1).getGene().doubleValue();
+            stopSpeedParam = geneMap.get(2).getGene().doubleValue();
         }
 
         private void moveUntilNextToFood(Time time) {
@@ -75,9 +79,8 @@ public class TestSimulator
     private class TestBrainFactory implements BrainFactory {
 
 
-
         @Override
-        public Brain createBrain(Time time, GeneMap genes) {
+        public Brain createBrain(Time time, Genotype<DoubleGene> genes) {
             return new TestGenedBrain(time, genes);
         }
 

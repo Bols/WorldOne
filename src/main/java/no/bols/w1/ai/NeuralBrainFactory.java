@@ -1,6 +1,8 @@
 package no.bols.w1.ai;//
 //
 
+import io.jenetics.DoubleGene;
+import io.jenetics.Genotype;
 import no.bols.w1.BrainFactory;
 import no.bols.w1.genes.GeneMap;
 import no.bols.w1.genes.GeneParameterValue;
@@ -10,8 +12,8 @@ import no.bols.w1.physics.Time;
 public class NeuralBrainFactory implements BrainFactory {
 
     @Override
-    public Brain createBrain(Time time, GeneMap genes) {
-        return new NeuralBrain(time, genes);
+    public Brain createBrain(Time time, Genotype<DoubleGene> genes) {
+        return null;//return new NeuralBrain(time, genes);
     }
 
     @Override
