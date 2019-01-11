@@ -15,5 +15,5 @@ public abstract class Brain {
     }
 
 
-    public abstract void initalizeTime();
+    public abstract void initializeRecurringInputEvents();
 }

@@ -18,40 +18,50 @@ import java.util.stream.Collectors;
 public class World1SimulatorRunner {
     private int scenarioTimeMs = 100000;
 
-    public List<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable(BrainFactory brainFactory) {
+    public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable(BrainFactory brainFactory) {
         long startTime = System.currentTimeMillis();
-        ExecutorService executorService = Executors.newWorkStealingPool(1);
+        int generations = 0;
+        ExecutorService executorService = Executors.newWorkStealingPool();
         Set<GeneMap> candidates = initializeInitialBrainGenes(brainFactory);
-        List<Pair<Double, GeneMap>> results = new ArrayList<>();
+        SortedSet<Pair<Double, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
         results.addAll(simulateCandidates(brainFactory, executorService, candidates));
-        int topScoreUnchangedNum = 0;
+        int topScoreUnchangedGenerations = 0;
         Double topScore = 0.0;
-        while (topScoreUnchangedNum < 20) {
-            results.sort((p1, p2) -> p2.getKey().compareTo(p1.getKey()));
+        while (topScoreUnchangedGenerations < 20) {
+            generations++;
             List<Pair<Double, GeneMap>> topList = results.stream().limit(16).collect(Collectors.toList());
 
-            Set<GeneMap> newCandidates = new HashSet<>();
-            newCandidates.add(topList.get(0).getValue().breed(topList.get(1).getValue()));
+            Set<GeneMap> newGeneration = new HashSet<>();
+            for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
+                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue()));
+            }
             topList.forEach(parent1 ->
             {
                 GeneMap parent2 = topList.get(new Random().nextInt(16)).getValue();
                 GeneMap offspring = parent1.getValue().breed(parent2);
-                newCandidates.add(offspring);
+                newGeneration.add(offspring);
             });
-            results.addAll(simulateCandidates(brainFactory, executorService, newCandidates));
-            results.sort((p1, p2) -> p2.getKey().compareTo(p1.getKey()));
-            if (topScore < results.get(0).getKey()) {
-                topScore = results.get(0).getKey();
-                topScoreUnchangedNum = 0;
-                System.out.println("\nNew best score " + topScore + " - " + results.get(0).getValue().toString());
+            results.addAll(simulateCandidates(brainFactory, executorService, newGeneration));
+            if (topScore < results.first().getKey()) {
+                topScore = results.first().getKey();
+                topScoreUnchangedGenerations = 0;
+                System.out.println("\nNew best score " + topScore + " - " + results.first().getValue().toString());
             } else {
-                topScoreUnchangedNum++;
+                topScoreUnchangedGenerations++;
                 //System.out.print("#");
             }
         }
-        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). Best score " + results.get(0).getKey() + " - " + results.get(0).getValue());
+        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). #Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
         return results;
     }
+
+    private int compare(Pair<Double, GeneMap> e1, Pair<Double, GeneMap> e2) {
+        int scoreCompare = e2.getKey().compareTo(e1.getKey());
+        if (scoreCompare != 0)
+            return scoreCompare;
+        return e1.getValue().equals(e2.getValue()) ? 0 : Integer.compare(e1.hashCode(), e2.hashCode());
+    }
+
 
     private List<Pair<Double, GeneMap>> simulateCandidates(BrainFactory brainFactory, ExecutorService executorService, Set<GeneMap> candidates) {
         return
@@ -97,7 +107,7 @@ public class World1SimulatorRunner {
         do {
             topScore = previousScore;
             time.reset();
-            brain.initalizeTime();
+            brain.initializeRecurringInputEvents();
             World simulationWorld = new World(time, brain);
             time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
             //System.out.println("New score "+simulationWorld.score()+" prev score "+topScore);
@@ -113,4 +123,5 @@ public class World1SimulatorRunner {
         }
         return ret;
     }
+
 }

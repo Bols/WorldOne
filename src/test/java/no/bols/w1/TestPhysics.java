@@ -24,7 +24,7 @@ public class TestPhysics
     public void testPhysics() {
         Time time = new Time();
         SteadySpeedBrain brain = new SteadySpeedBrain(time);
-        brain.initalizeTime();
+        brain.initializeRecurringInputEvents();
         World world = new World(time, brain);
         Food startFood = world.getCurrentFood();
         time.runUntil(t -> {
@@ -39,7 +39,7 @@ public class TestPhysics
         }
 
         @Override
-        public void initalizeTime() {
+        public void initializeRecurringInputEvents() {
             time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
         }
 

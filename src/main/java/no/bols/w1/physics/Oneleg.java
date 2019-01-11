@@ -19,6 +19,11 @@ public class Oneleg extends PhysObject {
         return distance(world.getCurrentFood());
     }
 
+    public double getEatingOutput() {
+        updateState();
+        return canEat() ? 1 : 0;
+    }
+
     public void motorOutput(double output) {
         if (output > 1.0) {
             throw new RuntimeException("Motor output=" + output);

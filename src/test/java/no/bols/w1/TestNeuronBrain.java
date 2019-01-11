@@ -7,7 +7,7 @@ import junit.framework.TestSuite;
 import no.bols.w1.ai.NeuralBrainFactory;
 import no.bols.w1.genes.GeneMap;
 
-import java.util.List;
+import java.util.SortedSet;
 
 /**
  * Unit test for simple App.
@@ -26,9 +26,9 @@ public class TestNeuronBrain
     public void testNeuronBrainScore() {
         World1SimulatorRunner simulator = World1SimulatorRunner.builder()
                 .scenarioTimeMs(25000).build();
-        List<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new NeuralBrainFactory());
-        Double topScore = result.get(0).getKey();
-        assertTrue("Score is " + topScore, topScore > 2.0);
+        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new NeuralBrainFactory());
+        Double topScore = result.first().getKey();
+        assertTrue("Score is too low: " + topScore, topScore > 2.0);
     }
 
 }

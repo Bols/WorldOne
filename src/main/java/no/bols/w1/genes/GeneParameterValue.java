@@ -1,10 +1,12 @@
 package no.bols.w1.genes;//
 //
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.util.Random;
 
+@EqualsAndHashCode
 public class GeneParameterValue extends Gene {
 
 
