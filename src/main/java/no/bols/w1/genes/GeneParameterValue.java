@@ -10,21 +10,13 @@ import java.util.Random;
 public class GeneParameterValue extends Gene {
 
 
-    private final double min;
-    private final double max;
+    private GeneParameterSpec geneParameterSpec;
     @Getter
     private final double value;
 
-    public GeneParameterValue(double min, double max) {
-        this.min = min;
-        this.max = max;
-        this.value = new Random().nextDouble() * (max - min) + min;
-    }
-
-    public GeneParameterValue(double min, double max, double childVal) {
-        this.min = min;
-        this.max = max;
-        this.value = Math.max(min, Math.min(max, childVal));
+    public GeneParameterValue(GeneParameterSpec geneParameterSpec, double childVal) {
+        this.geneParameterSpec = geneParameterSpec;
+        this.value = Math.max(geneParameterSpec.getMin(), Math.min(geneParameterSpec.getMax(), childVal));
     }
 
     @Override
@@ -36,13 +28,13 @@ public class GeneParameterValue extends Gene {
             double diff = Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue());
             double average = (value + otherValue.getValue()) / 2.0;
             if (minorMutation) {
-                return new GeneParameterValue(min, max, average + new Random().nextDouble() * .2 - .1);
+                return new GeneParameterValue(geneParameterSpec, average + new Random().nextDouble() * .2 - .1);
             } else {
                 double childVal = average + (new Random().nextDouble() * 1.4 - .7) * diff;
-                return new GeneParameterValue(min, max, childVal);
+                return new GeneParameterValue(geneParameterSpec, childVal);
             }
         } else {
-            return new GeneParameterValue(min, max);
+            return geneParameterSpec.randomValue();
         }
     }
 

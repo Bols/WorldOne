@@ -1,15 +1,16 @@
 package no.bols.w1.genes;//
 //
 
-import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.util.Random;
 
-@EqualsAndHashCode
-public class GeneParameterSpec extends GeneSpec {
 
+public class GeneParameterSpec extends GeneSpec<GeneParameterValue> {
 
+    @Getter
     private final double min;
+    @Getter
     private final double max;
 
     public GeneParameterSpec(double min, double max) {
@@ -18,8 +19,8 @@ public class GeneParameterSpec extends GeneSpec {
     }
 
 
-    public Gene randomValue() {
-        return new GeneParameterValue(min, max, new Random().nextDouble() * (max - min) + min);
+    public GeneParameterValue randomValue() {
+        return new GeneParameterValue(this, new Random().nextDouble() * (max - min) + min);
 
     }
 }
