@@ -15,17 +15,21 @@ public class NeuralBrain extends Brain {
     public NeuralBrain(Time time, GeneMap geneMap) {
         super(time);
         this.genes = new BrainGeneWrapper(geneMap);
+        NeuronSpace space = new NeuronSpace(genes);
         foodDistanceInput = new Neuron(time, genes);
         foodSensorInput = new Neuron(time, genes);
         motorOutput = new Neuron(time, genes);
-
-        motorOutput.addProportionalOutput(o -> oneleg.motorOutput(o));
+        space.add(foodDistanceInput);
+        space.add(foodSensorInput);
+        space.add(motorOutput);
+        space.initialize();
     }
 
 
     @Override
     public void initializeRecurringInputEvents() {
-        foodDistanceInput.addReverseProportionalInput(() -> oneleg.getFoodDistanceOutput());
+        foodDistanceInput.addReverseProportionalInputTimeEvent(() -> oneleg.getFoodDistanceOutput());
+        motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
 
         //time.scheduleRecurringEvent(t-> foodSensorInput.fireInput(oneleg.getEatingOutput()),10);
     }
