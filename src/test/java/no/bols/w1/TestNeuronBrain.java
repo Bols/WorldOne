@@ -25,8 +25,10 @@ public class TestNeuronBrain
 
     public void testNeuronBrainScore() {
         World1SimulatorRunner simulator = World1SimulatorRunner.builder()
-                .scenarioTimeMs(25000).build();
-        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new NeuralBrainFactory());
+                .scenarioTimeMs(25000)
+                .brainFactory(new NeuralBrainFactory())
+                .build();
+        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
         Double topScore = result.first().getKey();
         assertTrue("Score is too low: " + topScore, topScore > 2.0);
     }

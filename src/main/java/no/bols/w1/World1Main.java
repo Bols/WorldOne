@@ -8,6 +8,7 @@ public class World1Main {
     public static void main(String[] args) {
         World1SimulatorRunner.builder()
                 .scenarioTimeMs(10000)
-                .build().runGeneticAlgorithmUntilStable(new NeuralBrainFactory());
+                .brainFactory(new NeuralBrainFactory())
+                .build().runGeneticAlgorithmUntilStable();
     }
 }

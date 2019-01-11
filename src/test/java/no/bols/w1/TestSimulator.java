@@ -5,10 +5,14 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import no.bols.w1.genes.GeneMap;
+import no.bols.w1.genes.GeneParameterSpec;
 import no.bols.w1.genes.GeneParameterValue;
+import no.bols.w1.genes.GeneSpec;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 
 /**
@@ -31,8 +35,10 @@ public class TestSimulator
 
     public void testGeneSimulation() {
         World1SimulatorRunner simulator = World1SimulatorRunner.builder()
-                .scenarioTimeMs(25000).build();
-        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable(new TestBrainFactory());
+                .scenarioTimeMs(25000)
+                .brainFactory(new TestBrainFactory())
+                .build();
+        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
         GeneParameterValue bestTestParam = (GeneParameterValue) result.first().getValue().genes.get(MOVESPEEDPARAM);
         assertEquals(.5f, bestTestParam.getValue(), .05);
     }
@@ -82,11 +88,11 @@ public class TestSimulator
         }
 
         @Override
-        public GeneMap randomGenes() {
-            GeneMap geneMap = new GeneMap();
-            geneMap.genes.put(MOVESPEEDPARAM, new GeneParameterValue(0, 1));
-            geneMap.genes.put(STOPDISTANCEPARAM, new GeneParameterValue(0, 1));
-            geneMap.genes.put(STOPSPEEDPARAM, new GeneParameterValue(0, 1));
+        public Map<String, GeneSpec> geneSpec() {
+            Map<String, GeneSpec> geneMap = new HashMap<>();
+            geneMap.put(MOVESPEEDPARAM, new GeneParameterSpec(0, 1));
+            geneMap.put(STOPDISTANCEPARAM, new GeneParameterSpec(0, 1));
+            geneMap.put(STOPSPEEDPARAM, new GeneParameterSpec(0, 1));
 
             return geneMap;
         }
