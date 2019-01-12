@@ -14,9 +14,9 @@ public class Oneleg extends PhysObject {
         brain.setOneleg(this);
     }
 
-    public double getFoodDistanceOutput() {
+    public double getFoodProximityOutput() {
         updateState();
-        return distance(world.getCurrentFood());
+        return 1.0 / (Math.pow(2, distance(world.getCurrentFood())));
     }
 
     public double getEatingOutput() {
@@ -46,7 +46,7 @@ public class Oneleg extends PhysObject {
     }
 
     private boolean canEat() {
-        return distance(world.getCurrentFood()) < .01 && world.getCurrentFood().getFoodAmount() > 0;
+        return distance(world.getCurrentFood()) < .1 && world.getCurrentFood().getFoodAmount() > 0;
     }
 
 

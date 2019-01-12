@@ -28,12 +28,14 @@ public class NeuralBrain extends Brain {
 
     @Override
     public void initializeRecurringInputEvents() {
-        foodDistanceInput.addReverseProportionalInputTimeEvent(() -> oneleg.getFoodDistanceOutput());
+        foodDistanceInput.addReverseProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
 
         //time.scheduleRecurringEvent(t-> foodSensorInput.fireInput(oneleg.getEatingOutput()),10);
     }
 
     //reward feedback
+    //resonans
+    //stdp
     // 
 }

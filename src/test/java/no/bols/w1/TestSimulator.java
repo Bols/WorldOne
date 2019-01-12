@@ -58,7 +58,7 @@ public class TestSimulator
         }
 
         private void moveUntilNextToFood(Time time) {
-            if (oneleg.getFoodDistanceOutput() > stopDistanceParam) {
+            if (oneleg.getFoodProximityOutput() < stopDistanceParam) {
                 oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf());
             } else {
                 oneleg.motorOutput(stopSpeedParam);
