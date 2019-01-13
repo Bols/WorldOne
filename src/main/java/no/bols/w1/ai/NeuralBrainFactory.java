@@ -19,7 +19,7 @@ public class NeuralBrainFactory implements BrainFactory {
     }
 
     @Override
-    public Map<String, GeneSpec> geneSpec() {
+    public Map<String, GeneSpec> geneSpec() {                                 // Burde vært annotations direkte på BrainGeneWrapper
         Map<String, GeneSpec> geneSpecs = new HashMap<>();
         geneSpecs.put(BrainGeneWrapper.EXHIBITION_FACTOR, new GeneParameterSpec(0, 1));
         geneSpecs.put(BrainGeneWrapper.LEAK_PER_MS, new GeneParameterSpec(0, 0.1));

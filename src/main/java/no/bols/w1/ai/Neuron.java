@@ -54,13 +54,9 @@ public class Neuron {
         }, 10);
     }
 
-    public void addReverseProportionalInputTimeEvent(Supplier<Double> input) {
+    public void addProportionalInputTimeEvent(Supplier<Double> input) {
         time.scheduleRecurringEvent(t -> {
-            double inverseValue = input.get();
-            if (inverseValue <= 0) {
-                inputChange(1.0);
-            }
-            this.inputChange(1.0 / inverseValue);
+            this.inputChange(input.get());
         }, 10);
     }
 
