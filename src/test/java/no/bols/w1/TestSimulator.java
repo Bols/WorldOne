@@ -4,10 +4,7 @@ import javafx.util.Pair;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import no.bols.w1.genes.GeneMap;
-import no.bols.w1.genes.GeneParameterSpec;
-import no.bols.w1.genes.GeneParameterValue;
-import no.bols.w1.genes.GeneSpec;
+import no.bols.w1.genes.*;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
@@ -23,6 +20,8 @@ public class TestSimulator
     public static final String MOVESPEEDPARAM = "moveparam";
     public static final String STOPDISTANCEPARAM = "stopdistance";
     private static final String STOPSPEEDPARAM = "stopspeed";
+    public static final int TUNE_FACTOR_NUM = 10;
+    public static final String TUNE_GENE_NAME = "Gene";
 
 
     public TestSimulator(String testName) {
@@ -39,22 +38,23 @@ public class TestSimulator
                 .brainFactory(new TestBrainFactory())
                 .build();
         SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
-        GeneParameterValue bestTestParam = (GeneParameterValue) result.first().getValue().genes.get(MOVESPEEDPARAM);
-        assertEquals(.5f, bestTestParam.getValue(), .05);
+        Map<String, Gene> paramMap = result.first().getValue().genes;
+        for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
+            assertEquals(.5f, ((GeneParameterValue) paramMap.get(TUNE_GENE_NAME + i)).getValue(), .05);
+        }
     }
 
 
     private class TestGenedBrain extends Brain {
-        private final double moveParam;
         private final double stopDistanceParam;
         private final double stopSpeedParam;
+        private final GeneMap geneMap;
 
         public TestGenedBrain(Time time, GeneMap geneMap) {
             super(time);
-            moveParam = ((GeneParameterValue) geneMap.genes.get(MOVESPEEDPARAM)).getValue();
             stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
             stopSpeedParam = ((GeneParameterValue) geneMap.genes.get(STOPSPEEDPARAM)).getValue();
-
+            this.geneMap = geneMap;
         }
 
         private void moveUntilNextToFood(Time time) {
@@ -66,10 +66,12 @@ public class TestSimulator
         }
 
         private double calculateOutputWithMaxValueAchievedAtMoveParamHalf() {
-            if (moveParam < .3 || moveParam > .7) {
-                return 0;
+            double moveFactor = 1;
+            for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
+                double gene_i = ((GeneParameterValue) geneMap.genes.get(TUNE_GENE_NAME + i)).getValue();
+                moveFactor = moveFactor * Math.max(0, 1 - Math.abs(gene_i - .5));
             }
-            return Math.max(0, 1 - Math.abs(moveParam - .5));
+            return moveFactor;
         }
 
         @Override
@@ -90,9 +92,11 @@ public class TestSimulator
         @Override
         public Map<String, GeneSpec> geneSpec() {
             Map<String, GeneSpec> geneMap = new HashMap<>();
-            geneMap.put(MOVESPEEDPARAM, new GeneParameterSpec(0, 1));
             geneMap.put(STOPDISTANCEPARAM, new GeneParameterSpec(0, 1));
             geneMap.put(STOPSPEEDPARAM, new GeneParameterSpec(0, 1));
+            for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
+                geneMap.put(TUNE_GENE_NAME + i, new GeneParameterSpec(0, 1));
+            }
 
             return geneMap;
         }
