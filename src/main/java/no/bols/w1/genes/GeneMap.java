@@ -16,9 +16,9 @@ public class GeneMap {
         this.genes = genes;
     }
 
-    public GeneMap breed(GeneMap other) {
+    public GeneMap breed(GeneMap other, double mutationChance) {
         Map<String, Gene> result = new HashMap<>();
-        genes.forEach((name, gene) -> result.put(name, gene.breed(other.genes.get(name))));
+        genes.forEach((name, gene) -> result.put(name, gene.breed(other.genes.get(name), mutationChance)));
         return new GeneMap(result);
     }
 

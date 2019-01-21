@@ -42,6 +42,9 @@ public class World1SimulatorRunner {
 
     public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable() {
         return Engine.builder()
+                .initialPopulation(100)
+                .generationUsableSize(20)
+                .mutationChance(.2)
                 .evalFunction(this::evaluate)
                 .geneSpecs(brainFactory.geneSpec())
                 .build()

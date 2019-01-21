@@ -21,6 +21,8 @@ public class Engine {
     private int stableGenerationsLimit = 20;
     @Builder.Default
     private int generationUsableSize = 16;
+    @Builder.Default
+    private double mutationChance = .2;
 
     public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable() {
         long startTime = System.currentTimeMillis();
@@ -37,12 +39,12 @@ public class Engine {
 
             Set<GeneMap> newGeneration = new HashSet<>();
             for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
-                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue()));
+                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue(), mutationChance));
             }
             topList.forEach(parent1 ->
             {
                 GeneMap parent2 = topList.get(new Random().nextInt(generationUsableSize)).getValue();
-                GeneMap offspring = parent1.getValue().breed(parent2);
+                GeneMap offspring = parent1.getValue().breed(parent2, mutationChance);
                 newGeneration.add(offspring);
             });
             results.addAll(simulateCandidates(executorService, newGeneration));

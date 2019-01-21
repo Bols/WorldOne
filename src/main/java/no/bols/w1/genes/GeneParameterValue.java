@@ -20,11 +20,11 @@ public class GeneParameterValue extends Gene {
     }
 
     @Override
-    public GeneParameterValue breed(Gene other) {
+    public GeneParameterValue breed(Gene other, double mutationChance) {
         GeneParameterValue otherValue = (GeneParameterValue) other;
-        boolean mutation = new Random().nextDouble() < MUTATION_CHANCE;
+        boolean mutation = new Random().nextDouble() < mutationChance;
         if (!mutation) {
-            boolean minorMutation = new Random().nextDouble() < MUTATION_CHANCE;
+            boolean minorMutation = new Random().nextDouble() < mutationChance;
             double diff = Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue());
             double average = (value + otherValue.getValue()) / 2.0;
             if (minorMutation) {
