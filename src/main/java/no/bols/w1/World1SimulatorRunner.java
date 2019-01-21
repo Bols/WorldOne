@@ -1,19 +1,17 @@
 package no.bols.w1;
 
-import io.jenetics.*;
+import io.jenetics.DoubleGene;
+import io.jenetics.EliteSelector;
+import io.jenetics.GaussianMutator;
+import io.jenetics.Genotype;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.stat.DoubleMomentStatistics;
-import io.jenetics.util.Factory;
 import lombok.Builder;
-import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import static io.jenetics.engine.Limits.bySteadyFitness;
 
@@ -32,12 +30,9 @@ public class World1SimulatorRunner {
 
     public EvolutionResult<DoubleGene, Double> runGeneticAlgorithmUntilStable() {
 
-        Factory<Genotype<DoubleGene>> genotypeFactory = Genotype.of(
-                DoubleChromosome.of(0.0, 1.0),
-                DoubleChromosome.of(0.0, 1.0),
-                DoubleChromosome.of(0.0, 1.0)
-        );
-        Engine<DoubleGene, Double> engine = Engine.builder(f -> eval(f), genotypeFactory)
+
+        Engine<DoubleGene, Double> engine = Engine.builder(f -> eval(f), brainFactory.genotypeFactory())
+             
                 .selector(new EliteSelector<>(10))
                 .alterers(new GaussianMutator<>(.2))
                 .maximalPhenotypeAge(100000)
@@ -45,7 +40,7 @@ public class World1SimulatorRunner {
         final EvolutionStatistics<Double, DoubleMomentStatistics> statistics =
                 EvolutionStatistics.ofNumber();
         EvolutionResult<DoubleGene, Double> res = engine.stream()
-                .limit(bySteadyFitness(20))
+                .limit(bySteadyFitness(30))
                 .peek(statistics)
                 .parallel()
                 .collect(EvolutionResult.toBestEvolutionResult());
@@ -155,14 +150,6 @@ public class World1SimulatorRunner {
             previousScore = simulationWorld.score();
         } while (previousScore > topScore);
         return topScore;
-    }
-
-    private Set<GeneMap> initializeInitialBrainGenes(BrainFactory brainFactory) {
-        HashSet<GeneMap> ret = new HashSet<>();
-        for (int i = 0; i < 64; i++) {
-            ret.add(brainFactory.randomGenes());
-        }
-        return ret;
     }
 
 }
