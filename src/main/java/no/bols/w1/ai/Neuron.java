@@ -9,12 +9,15 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Neuron {
+    public static long STDP_PRE_TIME = 100;
+    public static long STDP_POST_TIME = 30;
+    public static double STDP_FACTOR = .3;
     private double voltage_state = 0;
     private long lastFireTime = 0;
     private Time time;
     private BrainGeneWrapper genes;
     private long lastUpdateState;
-    private Set<SynapticSource> synapticConnections = new HashSet<>();
+    private Set<SynapticConnection> synapticConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
 
     public Neuron(Time time, BrainGeneWrapper genes) {
@@ -28,7 +31,7 @@ public class Neuron {
         voltage_state += normalized_val * genes.getExhibitionFactor();
         if (voltage_state > genes.getFireTreshold()) {
             voltage_state = 0; //TODO
-            time.scheduleEvent(e -> fire(), 10);
+            time.scheduleEvent(e -> fire(), 1);
         }
     }
 
@@ -37,6 +40,9 @@ public class Neuron {
         lastFireTime = time.getTimeMilliSeconds();
         for (Consumer<FireEvent> fireListener : fireListeners) {
             fireListener.accept(fireEvent);
+        }
+        for (SynapticConnection synapticConnection : synapticConnections) {
+            synapticConnection.targetNeuronFired(fireEvent);
         }
     }
 
@@ -61,7 +67,7 @@ public class Neuron {
     }
 
     public void addSynapticSource(Neuron source) {
-        synapticConnections.add(new SynapticSource(source));
+        synapticConnections.add(new SynapticConnection(source, this));
     }
 
     public void addFireListener(Consumer<FireEvent> listener) {
@@ -69,17 +75,30 @@ public class Neuron {
     }
 
 
-    public class SynapticSource {
+    public static class SynapticConnection {
         private Neuron source;
+        private Neuron target;
         private double weight = .5;
 
-        public SynapticSource(Neuron source) {
+        public SynapticConnection(Neuron source, Neuron target) {
             this.source = source;
-            source.addFireListener(fireEvent -> sourceFired(fireEvent));
+            this.target = target;
+            source.addFireListener(fireEvent -> sourceNeuronFired(fireEvent));
         }
 
-        private void sourceFired(FireEvent fireEvent) {
-            Neuron.this.inputChange(weight);
+        private void sourceNeuronFired(FireEvent fireEvent) {
+            long timeDiff = fireEvent.getTime() - target.lastFireTime;
+            if (timeDiff < STDP_POST_TIME && timeDiff > 0) {
+                weight = weight - (weight * STDP_FACTOR * STDP_POST_TIME / timeDiff); //linear for now
+            }
+            target.inputChange(weight);
+        }
+
+        public void targetNeuronFired(FireEvent fireEvent) {
+            long timeDiff = fireEvent.getTime() - source.lastFireTime;
+            if (timeDiff < STDP_PRE_TIME && timeDiff > 0) {
+                weight = weight + (weight * STDP_FACTOR * STDP_PRE_TIME / timeDiff); //linear for now
+            }
         }
     }
 }

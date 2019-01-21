@@ -5,6 +5,21 @@ import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
+
+/**
+ * <h1>Må Oppnå</h1>
+ * <li>resonans</li>
+ * <li>distribuert vekt-justering</li>
+ * <li>skalering/vekst/nye neuroner til å håndtere mer kompliserte sammenhenger</li>
+ * <li>feedback til neuroner basert på om belønning var ihht. forventning?  belønning når en ny sammenheng er avdekket?</li>
+ * <h1>Mulige mekanismer:</h1>
+ * <li>stdp</li>
+ * <li>dopamin - eksternt styrt? Fra neuronene selv? </li>
+ * <li>programmert thalamus som innfører positiv feedback ved måloppnåelse</li>
+ * <li>innføre nye neuroner - random?</li>
+ * <li>gro nye synapser  - random?</li>
+ * <li>utmatting av neuroner for å begrense aktivitet?</li>
+ **/
 public class NeuralBrain extends Brain {
     final BrainGeneWrapper genes;
     private final Neuron foodDistanceInput;
@@ -38,7 +53,4 @@ public class NeuralBrain extends Brain {
     }
 
 
-    //resonans?
-    //stdp
-    //dopamin - eksternt styrt i første omgang, deretter fra neuroner basert på forventning?  dopamin når en ny sammenheng er avdekket?
 }
