@@ -32,8 +32,8 @@ public class World1SimulatorRunner {
 
 
         Engine<DoubleGene, Double> engine = Engine.builder(f -> eval(f), brainFactory.genotypeFactory())
-             
-                .selector(new EliteSelector<>(10))
+                .populationSize(1000)
+                .selector(new EliteSelector<>(100))
                 .alterers(new GaussianMutator<>(.2))
                 .maximalPhenotypeAge(100000)
                 .build();
