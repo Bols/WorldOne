@@ -3,7 +3,14 @@ package no.bols.w1.genes;//
 
 import javafx.util.Pair;
 import lombok.Builder;
+import no.bols.w1.genes.internal.GeneArraySpec;
+import no.bols.w1.genes.internal.GeneMap;
+import no.bols.w1.genes.internal.GeneParameterSpec;
+import no.bols.w1.genes.internal.GeneSpec;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -12,9 +19,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Builder
-public class Engine {
-    private Function<GeneMap, Double> evalFunction;
-    private Map<String, GeneSpec> geneSpecs;
+public class Engine<T> {
+    private Function<T, Double> evalFunction;
+    private T gene;
     @Builder.Default
     private int initialPopulation = 64;
     @Builder.Default
@@ -24,11 +31,12 @@ public class Engine {
     @Builder.Default
     private double mutationChance = .2;
 
-    public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable() {
+    public List<Pair<Double, T>> runGeneticAlgorithmUntilStable() {
+        Map<String, GeneSpec> geneSpec = mapToGeneSpec(gene);
         long startTime = System.currentTimeMillis();
         int generations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool();
-        Set<GeneMap> candidates = initialPopulation();
+        Set<GeneMap> candidates = initialPopulation(geneSpec);
         SortedSet<Pair<Double, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
         results.addAll(simulateCandidates(executorService, candidates));
         int topScoreUnchangedGenerations = 0;
@@ -58,7 +66,48 @@ public class Engine {
             }
         }
         System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). #Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
-        return results;
+        List<Pair<Double, T>> ret = results.stream()
+                .map(r -> new Pair<Double, T>(r.getKey(), mapToGene(r.getValue())))
+                .collect(Collectors.toList());
+        return ret;
+    }
+
+    private Map<String, GeneSpec> mapToGeneSpec(T gene) {
+        Map<String, GeneSpec> result = new HashMap<>();
+        Map<Class, Class> annotationToSpecMap = new HashMap<>();
+        annotationToSpecMap.put(DoubleGene.class, GeneParameterSpec.class);
+        for (Field field : gene.getClass().getDeclaredFields()) {
+            for (Annotation annotation : field.getAnnotations()) {
+                Class<? extends GeneSpec> matchingSpec = annotationToSpecMap.get(annotation.annotationType());
+                if (matchingSpec != null) {
+                    try {
+                        GeneSpec spec = matchingSpec.getConstructor(annotation.annotationType()).newInstance(annotation);
+                        if (field.getType().isArray()) {
+                            result.put(field.getName(), new GeneArraySpec(Array.getLength(field.get(gene)), spec));
+                        } else {
+                            result.put(field.getName(), spec);
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+
+        }
+        return result;
+    }
+
+    private T mapToGene(GeneMap spec) {
+        try {
+            Class<T> geneClass = (Class<T>) gene.getClass();
+            T ret = geneClass.newInstance();
+            for (String fieldName : spec.genes.keySet()) {
+                spec.genes.get(fieldName).assignToField(geneClass.getDeclaredField(fieldName), ret);
+            }
+            return ret;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private int compare(Pair<Double, GeneMap> e1, Pair<Double, GeneMap> e2) {
@@ -95,12 +144,12 @@ public class Engine {
         @Override
         public Pair<Double, GeneMap> call() {
             //System.out.println("Running scenario " + genes.toString());
-            return new Pair<>(evalFunction.apply(genes), genes);
+            return new Pair<>(evalFunction.apply(mapToGene(genes)), genes);
         }
 
     }
 
-    private Set<GeneMap> initialPopulation() {
+    private Set<GeneMap> initialPopulation(Map<String, GeneSpec> geneSpecs) {
         HashSet<GeneMap> ret = new HashSet<>();
         for (int i = 0; i < initialPopulation; i++) {
             GeneMap geneMap = new GeneMap();

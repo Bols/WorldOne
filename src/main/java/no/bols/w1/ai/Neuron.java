@@ -15,12 +15,12 @@ public class Neuron {
     private double voltage_state = 0;
     private long lastFireTime = 0;
     private Time time;
-    private BrainGeneWrapper genes;
+    private BrainGene genes;
     private long lastUpdateState;
     private Set<SynapticConnection> synapticConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
 
-    public Neuron(Time time, BrainGeneWrapper genes) {
+    public Neuron(Time time, BrainGene genes) {
         this.time = time;
         this.genes = genes;
     }

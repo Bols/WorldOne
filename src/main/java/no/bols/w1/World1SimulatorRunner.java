@@ -3,20 +3,19 @@ package no.bols.w1;
 import javafx.util.Pair;
 import lombok.Builder;
 import no.bols.w1.genes.Engine;
-import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
 
-import java.util.SortedSet;
+import java.util.List;
 
 
 @Builder
-public class World1SimulatorRunner {
+public class World1SimulatorRunner<T> {
     private int scenarioTimeMs = 100000;
-    BrainFactory brainFactory;
+    BrainFactory<T> brainFactory;
 
-    private double evaluate(GeneMap genes) {
+    private double evaluate(T genes) {
         Time time = new Time();
         Brain brain = brainFactory.createBrain(time, genes);
         Double score = runScenarioTrainingUntilStable(time, brain);
@@ -40,13 +39,13 @@ public class World1SimulatorRunner {
     }
 
 
-    public SortedSet<Pair<Double, GeneMap>> runGeneticAlgorithmUntilStable() {
-        return Engine.builder()
+    public List<Pair<Double, T>> runGeneticAlgorithmUntilStable() {
+        return Engine.<T>builder()
                 .initialPopulation(100)
                 .generationUsableSize(20)
                 .mutationChance(.2)
                 .evalFunction(this::evaluate)
-                .geneSpecs(brainFactory.geneSpec())
+                .gene(brainFactory.geneSpec())
                 .build()
                 .runGeneticAlgorithmUntilStable();
     }

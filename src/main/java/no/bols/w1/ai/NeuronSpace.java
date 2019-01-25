@@ -7,11 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class NeuronSpace {
-    private BrainGeneWrapper genes;
+    private BrainGene genes;
     private Time time;
     private Set<Neuron> neurons = new HashSet<>();
 
-    public NeuronSpace(Time time, BrainGeneWrapper genes) {
+    public NeuronSpace(Time time, BrainGene genes) {
         this.genes = genes;
         this.time = time;
     }

@@ -1,4 +1,4 @@
-package no.bols.w1.genes;//
+package no.bols.w1.genes.internal;//
 //
 
 import java.util.HashMap;
@@ -6,18 +6,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class GeneMap {
-    public Map<String, Gene> genes;
+    public Map<String, GeneValue> genes;
 
     public GeneMap() {
         genes = new HashMap<>();
     }
 
-    public GeneMap(Map<String, Gene> genes) {
+    public GeneMap(Map<String, GeneValue> genes) {
         this.genes = genes;
     }
 
     public GeneMap breed(GeneMap other, double mutationChance) {
-        Map<String, Gene> result = new HashMap<>();
+        Map<String, GeneValue> result = new HashMap<>();
         genes.forEach((name, gene) -> result.put(name, gene.breed(other.genes.get(name), mutationChance)));
         return new GeneMap(result);
     }

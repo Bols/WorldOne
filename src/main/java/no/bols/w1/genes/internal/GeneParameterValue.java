@@ -1,17 +1,15 @@
-package no.bols.w1.genes;//
+package no.bols.w1.genes.internal;//
 //
 
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 import java.util.Random;
 
 @EqualsAndHashCode
-public class GeneParameterValue extends Gene {
+public class GeneParameterValue extends GeneValue<Double> {
 
 
     private GeneParameterSpec geneParameterSpec;
-    @Getter
     private final double value;
 
     public GeneParameterValue(GeneParameterSpec geneParameterSpec, double childVal) {
@@ -20,7 +18,7 @@ public class GeneParameterValue extends Gene {
     }
 
     @Override
-    public GeneParameterValue breed(Gene other, double mutationChance) {
+    public GeneParameterValue breed(GeneValue other, double mutationChance) {
         GeneParameterValue otherValue = (GeneParameterValue) other;
         boolean mutation = new Random().nextDouble() < mutationChance;
         if (!mutation) {
@@ -36,6 +34,11 @@ public class GeneParameterValue extends Gene {
         } else {
             return geneParameterSpec.randomValue();
         }
+    }
+
+    @Override
+    public Double getValue() {
+        return value;
     }
 
     @Override

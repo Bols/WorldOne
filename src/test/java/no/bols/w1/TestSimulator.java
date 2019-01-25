@@ -4,24 +4,18 @@ import javafx.util.Pair;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import no.bols.w1.genes.*;
+import no.bols.w1.genes.DoubleGene;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
+import java.util.List;
 
 /**
  * Unit test for simple App.
  */
 public class TestSimulator
         extends TestCase {
-    public static final String MOVESPEEDPARAM = "moveparam";
-    public static final String STOPDISTANCEPARAM = "stopdistance";
-    private static final String STOPSPEEDPARAM = "stopspeed";
     public static final int TUNE_FACTOR_NUM = 10;
-    public static final String TUNE_GENE_NAME = "Gene";
 
 
     public TestSimulator(String testName) {
@@ -33,43 +27,38 @@ public class TestSimulator
     }
 
     public void testGeneSimulation() {
-        World1SimulatorRunner simulator = World1SimulatorRunner.builder()
+        World1SimulatorRunner simulator = World1SimulatorRunner.<TestGenes>builder()
                 .scenarioTimeMs(25000)
                 .brainFactory(new TestBrainFactory())
                 .build();
-        SortedSet<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
-        Map<String, Gene> paramMap = result.first().getValue().genes;
+        List<Pair<Double, TestGenes>> result = simulator.runGeneticAlgorithmUntilStable();
+        TestGenes bestGene = result.get(0).getValue();
         for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
-            assertEquals(.5f, ((GeneParameterValue) paramMap.get(TUNE_GENE_NAME + i)).getValue(), .05);
+            assertEquals(.5f, bestGene.moveParam[i], .05);
         }
     }
 
 
     private class TestGenedBrain extends Brain {
-        private final double stopDistanceParam;
-        private final double stopSpeedParam;
-        private final GeneMap geneMap;
+        private final TestGenes genes;
 
-        public TestGenedBrain(Time time, GeneMap geneMap) {
+        public TestGenedBrain(Time time, TestGenes genes) {
             super(time);
-            stopDistanceParam = ((GeneParameterValue) geneMap.genes.get(STOPDISTANCEPARAM)).getValue();
-            stopSpeedParam = ((GeneParameterValue) geneMap.genes.get(STOPSPEEDPARAM)).getValue();
-            this.geneMap = geneMap;
+            this.genes = genes;
         }
 
         private void moveUntilNextToFood(Time time) {
-            if (oneleg.getFoodProximityOutput() < stopDistanceParam) {
+            if (oneleg.getFoodProximityOutput() < genes.stopDistance) {
                 oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf());
             } else {
-                oneleg.motorOutput(stopSpeedParam);
+                oneleg.motorOutput(genes.stopSpeed);
             }
         }
 
         private double calculateOutputWithMaxValueAchievedAtMoveParamHalf() {
             double moveFactor = 1;
             for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
-                double gene_i = ((GeneParameterValue) geneMap.genes.get(TUNE_GENE_NAME + i)).getValue();
-                moveFactor = moveFactor * Math.max(0, 1 - Math.abs(gene_i - .5));
+                moveFactor = moveFactor * Math.max(0, 1 - Math.abs(genes.moveParam[i] - .5));
             }
             return moveFactor;
         }
@@ -80,25 +69,27 @@ public class TestSimulator
         }
     }
 
-    private class TestBrainFactory implements BrainFactory {
+    public static class TestGenes {
+        @DoubleGene(min = .0, max = 1.0)
+        public double stopDistance;
+        @DoubleGene(min = .0, max = 1.0)
+        public double stopSpeed;
 
+        @DoubleGene(min = .0, max = 1.0)
+        public double[] moveParam = new double[TUNE_FACTOR_NUM];
 
+    }
+
+    private class TestBrainFactory implements BrainFactory<TestGenes> {
 
         @Override
-        public Brain createBrain(Time time, GeneMap genes) {
+        public Brain createBrain(Time time, TestGenes genes) {
             return new TestGenedBrain(time, genes);
         }
 
         @Override
-        public Map<String, GeneSpec> geneSpec() {
-            Map<String, GeneSpec> geneMap = new HashMap<>();
-            geneMap.put(STOPDISTANCEPARAM, new GeneParameterSpec(0, 1));
-            geneMap.put(STOPSPEEDPARAM, new GeneParameterSpec(0, 1));
-            for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
-                geneMap.put(TUNE_GENE_NAME + i, new GeneParameterSpec(0, 1));
-            }
-
-            return geneMap;
+        public TestGenes geneSpec() {
+            return new TestGenes();
         }
     }
 }

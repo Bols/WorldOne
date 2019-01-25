@@ -1,7 +1,6 @@
 package no.bols.w1.ai;//
 //
 
-import no.bols.w1.genes.GeneMap;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
@@ -21,16 +20,16 @@ import no.bols.w1.physics.Time;
  * <li>utmatting av neuroner for å begrense aktivitet?</li>
  **/
 public class NeuralBrain extends Brain {
-    final BrainGeneWrapper genes;
+    final BrainGene genes;
     private final Neuron foodDistanceInput;
     private final Neuron foodSensorInput;
     private final Neuron motorOutput;
     private final NeuronSpace neuronSpace;
 
 
-    public NeuralBrain(Time time, GeneMap geneMap) {
+    public NeuralBrain(Time time, BrainGene genes) {
         super(time);
-        this.genes = new BrainGeneWrapper(geneMap);
+        this.genes = genes;
         neuronSpace = new NeuronSpace(time, genes);
         foodDistanceInput = new Neuron(time, genes);
         foodSensorInput = new Neuron(time, genes);
