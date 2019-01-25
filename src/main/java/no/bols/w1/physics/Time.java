@@ -4,6 +4,8 @@ package no.bols.w1.physics;//
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -13,6 +15,7 @@ public class Time {
     private long timeMilliSeconds;
     private PriorityQueue<Event> scheduledEvents;
     int eventsHandled;
+    private List<RecurringEvent> recurringEventsList = new ArrayList<>();
 
     public Time() {
         reset();
@@ -23,7 +26,8 @@ public class Time {
     }
 
     public void scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
-        scheduledEvents.add(new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds));
+        RecurringEvent event = new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds);
+        recurringEventsList.add(event);
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
@@ -48,6 +52,7 @@ public class Time {
         timeMilliSeconds = 0;
         scheduledEvents = new PriorityQueue<>();
         eventsHandled = 0;
+        recurringEventsList.forEach(scheduledEvents::add);
     }
 
 
@@ -74,7 +79,7 @@ public class Time {
 
         @Override
         public void afterEvent(Time time) {
-            time.scheduleRecurringEvent(eventHandler, intervalMilliseconds);
+            time.scheduledEvents.add(new RecurringEvent(eventHandler, time.getTimeMilliSeconds() + intervalMilliseconds, intervalMilliseconds));
         }
     }
 }

@@ -45,6 +45,7 @@ public class TestSimulator
         public TestGenedBrain(Time time, TestGenes genes) {
             super(time);
             this.genes = genes;
+            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
         }
 
         private void moveUntilNextToFood(Time time) {
@@ -63,10 +64,6 @@ public class TestSimulator
             return moveFactor;
         }
 
-        @Override
-        public void initializeRecurringInputEvents() {
-            time.scheduleRecurringEvent(t -> moveUntilNextToFood(t), 10);
-        }
     }
 
     public static class TestGenes {

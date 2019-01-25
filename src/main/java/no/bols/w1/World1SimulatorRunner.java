@@ -19,7 +19,6 @@ public class World1SimulatorRunner<T> {
         Time time = new Time();
         Brain brain = brainFactory.createBrain(time, genes);
         Double score = runScenarioTrainingUntilStable(time, brain);
-        //System.out.print("Score " + score + ", genes " + genes.toString() + "\n");
         return score;
     }
 
@@ -29,11 +28,14 @@ public class World1SimulatorRunner<T> {
         do {
             topScore = previousScore;
             time.reset();
-            brain.initializeRecurringInputEvents();
             World simulationWorld = new World(time, brain);
             time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
             //System.out.println("New score "+simulationWorld.score()+" prev score "+topScore);
             previousScore = simulationWorld.score();
+            if (topScore > 0 && previousScore > topScore) {
+                System.out.println("Improvement " + topScore + " -> " + previousScore);
+                throw new RuntimeException(("Improvement!"));
+            }
         } while (previousScore > topScore);
         return topScore;
     }

@@ -14,6 +14,4 @@ public abstract class Brain {
         this.time = time;
     }
 
-
-    public abstract void initializeRecurringInputEvents();
 }

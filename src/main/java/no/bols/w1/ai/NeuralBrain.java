@@ -38,17 +38,12 @@ public class NeuralBrain extends Brain {
         neuronSpace.add(foodSensorInput);
         neuronSpace.add(motorOutput);
         neuronSpace.connectAll();
-    }
-
-
-    @Override
-    public void initializeRecurringInputEvents() {
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
         foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.getEatingOutput());     // Kan erstattes med events ( istedet for recurring time event?)
         //neuronSpace.addProportionalDopamineTimeEvent(()->oneleg.getEatingOutput());
 
-        //time.scheduleRecurringEvent(t-> foodSensorInput.fireInput(oneleg.getEatingOutput()),10);
+
     }
 
 
