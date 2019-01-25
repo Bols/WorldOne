@@ -29,8 +29,8 @@ public class TestNeuronBrain
                 .scenarioTimeMs(25000)
                 .brainFactory(new NeuralBrainFactory())
                 .build();
-        List<Pair<Double, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
-        Double topScore = result.get(0).getKey();
+        List<Pair<WorldScoreWithTrainingHistory, GeneMap>> result = simulator.runGeneticAlgorithmUntilStable();
+        Double topScore = result.get(0).getKey().getBestScore().getScore();
         assertTrue("Score is too low: " + topScore, topScore > 2.0);
     }
 

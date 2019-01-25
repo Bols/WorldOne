@@ -13,17 +13,17 @@ import java.util.List;
 /**
  * Unit test for simple App.
  */
-public class TestSimulator
+public class TestGeneEngine
         extends TestCase {
     public static final int TUNE_FACTOR_NUM = 10;
 
 
-    public TestSimulator(String testName) {
+    public TestGeneEngine(String testName) {
         super(testName);
     }
 
     public static Test suite() {
-        return new TestSuite(TestSimulator.class);
+        return new TestSuite(TestGeneEngine.class);
     }
 
     public void testGeneSimulation() {

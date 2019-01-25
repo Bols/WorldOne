@@ -22,10 +22,11 @@ public class World {
         placeFood();
     }
 
-    public double score() {
+    public WorldScore score() {
         double eaten = foodEaten + (1 - currentFood.getFoodAmount());
         double moveAmount = oneleg.getPosition() / 100.0;
-        return eaten + (moveAmount > 1.0 ? 1.0 : moveAmount);
+        double score = eaten + (moveAmount > 1.0 ? 1.0 : moveAmount);
+        return new WorldScore(score, oneleg.getPosition(), foodEaten);
     }
 
 

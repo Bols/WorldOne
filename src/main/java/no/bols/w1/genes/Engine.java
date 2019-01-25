@@ -19,9 +19,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Builder
-public class Engine<T> {
-    private Function<T, Double> evalFunction;
-    private T gene;
+public class Engine<G, S extends Comparable> {
+    private Function<G, S> evalFunction;
+    private G gene;
     @Builder.Default
     private int initialPopulation = 64;
     @Builder.Default
@@ -31,19 +31,19 @@ public class Engine<T> {
     @Builder.Default
     private double mutationChance = .2;
 
-    public List<Pair<Double, T>> runGeneticAlgorithmUntilStable() {
+    public List<Pair<S, G>> runGeneticAlgorithmUntilStable() {
         Map<String, GeneSpec> geneSpec = mapToGeneSpec(gene);
         long startTime = System.currentTimeMillis();
         int generations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool();
         Set<GeneMap> candidates = initialPopulation(geneSpec);
-        SortedSet<Pair<Double, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
+        SortedSet<Pair<S, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
         results.addAll(simulateCandidates(executorService, candidates));
         int topScoreUnchangedGenerations = 0;
-        Double topScore = 0.0;
+        S topScore = null;
         while (topScoreUnchangedGenerations < stableGenerationsLimit) {
             generations++;
-            List<Pair<Double, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
+            List<Pair<S, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
 
             Set<GeneMap> newGeneration = new HashSet<>();
             for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
@@ -56,7 +56,7 @@ public class Engine<T> {
                 newGeneration.add(offspring);
             });
             results.addAll(simulateCandidates(executorService, newGeneration));
-            if (topScore < results.first().getKey()) {
+            if (topScore == null || topScore.compareTo(results.first().getKey()) < 0) {
                 topScore = results.first().getKey();
                 topScoreUnchangedGenerations = 0;
                 System.out.println("\nNew best score " + topScore + " - " + results.first().getValue().toString());
@@ -65,14 +65,15 @@ public class Engine<T> {
                 //System.out.print("#");
             }
         }
-        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). #Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
-        List<Pair<Double, T>> ret = results.stream()
-                .map(r -> new Pair<Double, T>(r.getKey(), mapToGene(r.getValue())))
+        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
+                "#Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
+        List<Pair<S, G>> ret = results.stream()
+                .map(r -> new Pair<S, G>(r.getKey(), mapToGene(r.getValue())))
                 .collect(Collectors.toList());
         return ret;
     }
 
-    private Map<String, GeneSpec> mapToGeneSpec(T gene) {
+    private Map<String, GeneSpec> mapToGeneSpec(G gene) {
         Map<String, GeneSpec> result = new HashMap<>();
         Map<Class, Class> annotationToSpecMap = new HashMap<>();
         annotationToSpecMap.put(DoubleGene.class, GeneParameterSpec.class);
@@ -97,10 +98,10 @@ public class Engine<T> {
         return result;
     }
 
-    private T mapToGene(GeneMap spec) {
+    private G mapToGene(GeneMap spec) {
         try {
-            Class<T> geneClass = (Class<T>) gene.getClass();
-            T ret = geneClass.newInstance();
+            Class<G> geneClass = (Class<G>) gene.getClass();
+            G ret = geneClass.newInstance();
             for (String fieldName : spec.genes.keySet()) {
                 spec.genes.get(fieldName).assignToField(geneClass.getDeclaredField(fieldName), ret);
             }
@@ -110,7 +111,7 @@ public class Engine<T> {
         }
     }
 
-    private int compare(Pair<Double, GeneMap> e1, Pair<Double, GeneMap> e2) {
+    private int compare(Pair<S, GeneMap> e1, Pair<S, GeneMap> e2) {
         int scoreCompare = e2.getKey().compareTo(e1.getKey());
         if (scoreCompare != 0)
             return scoreCompare;
@@ -118,7 +119,7 @@ public class Engine<T> {
     }
 
 
-    private List<Pair<Double, GeneMap>> simulateCandidates(ExecutorService executorService, Set<GeneMap> candidates) {
+    private List<Pair<S, GeneMap>> simulateCandidates(ExecutorService executorService, Set<GeneMap> candidates) {
         return
                 candidates.stream()
                         .map(gene -> executorService.submit(new SimulatorCallable(gene)))
@@ -134,7 +135,7 @@ public class Engine<T> {
     }
 
 
-    public class SimulatorCallable implements Callable<Pair<Double, GeneMap>> {
+    public class SimulatorCallable implements Callable<Pair<S, GeneMap>> {
         private GeneMap genes;
 
         public SimulatorCallable(GeneMap genes) {
@@ -142,7 +143,7 @@ public class Engine<T> {
         }
 
         @Override
-        public Pair<Double, GeneMap> call() {
+        public Pair<S, GeneMap> call() {
             //System.out.println("Running scenario " + genes.toString());
             return new Pair<>(evalFunction.apply(mapToGene(genes)), genes);
         }

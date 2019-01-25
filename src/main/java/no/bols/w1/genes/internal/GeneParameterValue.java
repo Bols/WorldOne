@@ -11,6 +11,7 @@ public class GeneParameterValue extends GeneValue<Double> {
 
     private GeneParameterSpec geneParameterSpec;
     private final double value;
+    private Random random = new Random();
 
     public GeneParameterValue(GeneParameterSpec geneParameterSpec, double childVal) {
         this.geneParameterSpec = geneParameterSpec;
@@ -20,20 +21,28 @@ public class GeneParameterValue extends GeneValue<Double> {
     @Override
     public GeneParameterValue breed(GeneValue other, double mutationChance) {
         GeneParameterValue otherValue = (GeneParameterValue) other;
-        boolean mutation = new Random().nextDouble() < mutationChance;
-        if (!mutation) {
-            boolean minorMutation = new Random().nextDouble() < mutationChance;
+        if (!chance(mutationChance)) {
             double diff = Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue());
             double average = (value + otherValue.getValue()) / 2.0;
-            if (minorMutation) {
-                return new GeneParameterValue(geneParameterSpec, average + new Random().nextDouble() * .2 - .1);
+            if (chance(mutationChance)) {
+                return new GeneParameterValue(geneParameterSpec, average + random.nextDouble() * .2 - .1);
             } else {
-                double childVal = average + (new Random().nextDouble() * 1.4 - .7) * diff;
+                double childVal = average + (random.nextDouble() * 1.4 - .7) * diff;
                 return new GeneParameterValue(geneParameterSpec, childVal);
             }
         } else {
+            if (chance(.1)) {
+                return new GeneParameterValue(geneParameterSpec, geneParameterSpec.getMin());
+            }
+            if (chance(.1)) {
+                return new GeneParameterValue(geneParameterSpec, geneParameterSpec.getMax());
+            }
             return geneParameterSpec.randomValue();
         }
+    }
+
+    protected boolean chance(double percent) {
+        return random.nextDouble() < percent;
     }
 
     @Override
@@ -43,6 +52,6 @@ public class GeneParameterValue extends GeneValue<Double> {
 
     @Override
     public String toString() {
-        return String.valueOf(value);
+        return String.format("%3.2f", value);
     }
 }
