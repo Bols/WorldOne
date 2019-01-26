@@ -12,6 +12,7 @@ import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
 
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 
 @Builder
@@ -40,7 +41,7 @@ public class World1SimulatorRunner<G> {
     }
 
 
-    public List<Pair<WorldScoreWithTrainingHistory, G>> runGeneticAlgorithmUntilStable() {
+    public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
                 .initialPopulation(100)
                 .generationUsableSize(20)
@@ -51,13 +52,7 @@ public class World1SimulatorRunner<G> {
                 .otherScoresReceiver(this::otherScore)
                 .build()
                 .runGeneticAlgorithmUntilStable();
-        visualizeScore(bestScore.getKey());
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        return ret;
+        return bestScore;
     }
 
 
@@ -73,24 +68,29 @@ public class World1SimulatorRunner<G> {
 
     }
 
-    private void visualizeScore(WorldScoreWithTrainingHistory score) {
+    public void visualizeScore(WorldScoreWithTrainingHistory score) {
+        CountDownLatch countDownLatch = new CountDownLatch(1);
         new JFXPanel();
         jfxVisualize = new JfxVisualize();
         Time time = score.getTime();
         time.reset();
         World simulationWorld = new World(time, score.getBrain());
-        time.scheduleRecurringEvent(t -> jfxVisualize.addDataPoint(t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition()), 100);
+        time.scheduleRecurringEvent(t -> jfxVisualize.addDataPoint("oneleg", t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition()), 100);
+        time.scheduleRecurringEvent(t -> jfxVisualize.addDataPoint("output", t.getTimeMilliSeconds(), simulationWorld.getOneleg().getLastMotorOutput()), 100);
         time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
 
 
         Platform.runLater(() -> {
-            try {
-                jfxVisualize.start(new Stage());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
+            Stage stage = new Stage();
+            stage.setOnHiding(event -> countDownLatch.countDown());
+            jfxVisualize.start(stage);
         });
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
 }

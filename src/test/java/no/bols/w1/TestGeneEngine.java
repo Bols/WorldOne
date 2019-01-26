@@ -9,8 +9,6 @@ import no.bols.w1.genes.DoubleGene;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
-import java.util.List;
-
 /**
  * Unit test for simple App.
  */
@@ -32,8 +30,8 @@ public class TestGeneEngine
                 .scenarioTimeMs(25000)
                 .brainFactory(new TestBrainFactory())
                 .build();
-        List<Pair<Double, TestGenes>> result = simulator.runGeneticAlgorithmUntilStable();
-        TestGenes bestGene = result.get(0).getValue();
+        Pair<Double, TestGenes> result = simulator.runGeneticAlgorithmUntilStable();
+        TestGenes bestGene = result.getValue();
         for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
             assertEquals(.5f, bestGene.moveParam[i], .05);
         }

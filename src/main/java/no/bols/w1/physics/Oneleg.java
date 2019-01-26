@@ -1,11 +1,14 @@
 package no.bols.w1.physics;//
 
+import lombok.Getter;
+
 public class Oneleg extends PhysObject {
 
     private static double MAX_SPEED = 1; //positions pr. second
     private static double EAT_SPEED = .5; //amount pr second
     private Brain brain;
     private long lastPositionTime = 0;
+    @Getter
     private double lastMotorOutput;
 
     public Oneleg(World world, Brain brain, double position) {
