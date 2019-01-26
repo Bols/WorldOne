@@ -17,7 +17,7 @@ import java.util.concurrent.CountDownLatch;
 
 @Builder
 public class World1SimulatorRunner<G> {
-    private int scenarioTimeMs = 100000;
+    private int scenarioTimeMs;
     BrainFactory<G> brainFactory;
     private JfxVisualize jfxVisualize;
     private Pair<WorldScoreWithTrainingHistory, G> bestScore;
@@ -52,6 +52,7 @@ public class World1SimulatorRunner<G> {
                 .otherScoresReceiver(this::otherScore)
                 .build()
                 .runGeneticAlgorithmUntilStable();
+        visualizeScore(bestScore);
         return bestScore;
     }
 
@@ -68,16 +69,26 @@ public class World1SimulatorRunner<G> {
 
     }
 
-    public void visualizeScore(WorldScoreWithTrainingHistory score) {
+    public void visualizeScore(Pair<WorldScoreWithTrainingHistory, G> score) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         new JFXPanel();
         jfxVisualize = new JfxVisualize();
-        Time time = score.getTime();
+        Time time = score.getKey().getTime();
         time.reset();
-        World simulationWorld = new World(time, score.getBrain());
-        time.scheduleRecurringEvent(t -> jfxVisualize.addDataPoint("oneleg", t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition()), 100);
-        time.scheduleRecurringEvent(t -> jfxVisualize.addDataPoint("output", t.getTimeMilliSeconds(), simulationWorld.getOneleg().getLastMotorOutput()), 100);
-        time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
+        Brain blankBrain = brainFactory.createBrain(time, score.getValue());
+        WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
+        Time.RecurringEvent graphEvent = null;
+        do {
+            if (graphEvent != null) {
+                time.unScheduleRecurringEvent(graphEvent);
+            }
+            time.reset();
+            World simulationWorld = new World(time, blankBrain);
+            graphEvent = time.scheduleRecurringEvent(t ->
+                    jfxVisualize.addDataPoint("I" + scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition()), 100);
+            time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
+            scoreList.addScore(simulationWorld.score());
+        } while (scoreList.lastScoreWasImprovement());
 
 
         Platform.runLater(() -> {

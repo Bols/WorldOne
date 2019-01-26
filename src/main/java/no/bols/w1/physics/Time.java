@@ -25,10 +25,11 @@ public class Time {
         scheduledEvents.add(new Event(eventHandler, getTimeMilliSeconds() + timeOffsetMilliseconds));
     }
 
-    public void scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
+    public RecurringEvent scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
         RecurringEvent event = new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds);
         recurringEventsList.add(event);
         scheduledEvents.add(event);
+        return event;
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
@@ -56,6 +57,10 @@ public class Time {
         recurringEventsList.forEach(scheduledEvents::add);
     }
 
+    public void unScheduleRecurringEvent(RecurringEvent event) {
+        recurringEventsList.remove(event);
+    }
+
 
     @AllArgsConstructor
     private static class Event implements Comparable<Event> {
@@ -70,7 +75,7 @@ public class Time {
         }
     }
 
-    private static class RecurringEvent extends Event {
+    public static class RecurringEvent extends Event {
         private final long intervalMilliseconds;
 
         public RecurringEvent(Consumer<Time> eventHandler, long time, long intervalMilliseconds) {

@@ -30,7 +30,6 @@ public class TestNeuronBrain
                 .build();
         Pair<WorldScoreWithTrainingHistory, GeneMap> result = simulator.runGeneticAlgorithmUntilStable();
         Double topScore = result.getKey().getBestScore().getScore();
-        simulator.visualizeScore(result.getKey());
         assertTrue("Score is too low: " + topScore, topScore > 2.0);
     }
 
