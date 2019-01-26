@@ -4,6 +4,7 @@ import javafx.util.Pair;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import lombok.ToString;
 import no.bols.w1.genes.DoubleGene;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
@@ -15,7 +16,7 @@ import java.util.List;
  */
 public class TestGeneEngine
         extends TestCase {
-    public static final int TUNE_FACTOR_NUM = 10;
+    public static final int TUNE_FACTOR_NUM = 5;
 
 
     public TestGeneEngine(String testName) {
@@ -66,6 +67,7 @@ public class TestGeneEngine
 
     }
 
+    @ToString
     public static class TestGenes {
         @DoubleGene(min = .0, max = 1.0)
         public double stopDistance;

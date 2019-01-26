@@ -4,6 +4,7 @@ package no.bols.w1.physics;//
 import lombok.Getter;
 
 public class World {
+    @Getter
     final Oneleg oneleg;
 
     int foodEaten = 0;

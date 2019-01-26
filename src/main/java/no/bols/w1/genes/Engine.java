@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,9 @@ public class Engine<G, S extends Comparable> {
     private int generationUsableSize = 16;
     @Builder.Default
     private double mutationChance = .2;
+    private Consumer<Pair<S, G>> bestScoreReceiver;
+    private Consumer<S> otherScoresReceiver;
+
 
     public List<Pair<S, G>> runGeneticAlgorithmUntilStable() {
         Map<String, GeneSpec> geneSpec = mapToGeneSpec(gene);
@@ -55,15 +59,26 @@ public class Engine<G, S extends Comparable> {
                 GeneMap offspring = parent1.getValue().breed(parent2, mutationChance);
                 newGeneration.add(offspring);
             });
-            results.addAll(simulateCandidates(executorService, newGeneration));
+            List<Pair<S, GeneMap>> newResults = simulateCandidates(executorService, newGeneration);
+            results.addAll(newResults);
             if (topScore == null || topScore.compareTo(results.first().getKey()) < 0) {
                 topScore = results.first().getKey();
                 topScoreUnchangedGenerations = 0;
-                System.out.println("\nNew best score " + topScore + " - " + results.first().getValue().toString());
+                GeneMap topGene = results.first().getValue();
+                if (bestScoreReceiver != null) {
+                    bestScoreReceiver.accept(new Pair(topScore, mapToGene(topGene)));
+                }
             } else {
                 topScoreUnchangedGenerations++;
-                //System.out.print("#");
             }
+            if (otherScoresReceiver != null) {
+                for (Pair<S, GeneMap> otherResults : newResults) {
+                    if (otherResults.getKey() != topScore) {
+                        otherScoresReceiver.accept(otherResults.getKey());
+                    }
+                }
+            }
+
         }
         System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
                 "#Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());

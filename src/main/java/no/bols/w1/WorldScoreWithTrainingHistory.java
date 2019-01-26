@@ -2,6 +2,8 @@ package no.bols.w1;//
 //
 
 import lombok.Getter;
+import no.bols.w1.physics.Brain;
+import no.bols.w1.physics.Time;
 import no.bols.w1.physics.WorldScore;
 
 import java.util.ArrayList;
@@ -10,8 +12,15 @@ import java.util.stream.Collectors;
 
 @Getter
 public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithTrainingHistory> {
+    private Time time;
+    private Brain brain;
     private WorldScore bestScore;
     private List<WorldScore> history = new ArrayList<>();
+
+    public WorldScoreWithTrainingHistory(Time time, Brain brain) {
+        this.time = time;
+        this.brain = brain;
+    }
 
     public void addScore(WorldScore newScore) {
         history.add(newScore);
@@ -38,5 +47,10 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
 
     public String f(double d) {
         return String.format("%3.2f", d);
+    }
+
+    public void cleanupMemory() {
+        this.time = null;
+        this.brain = null;
     }
 }

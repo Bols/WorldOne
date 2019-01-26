@@ -28,6 +28,7 @@ public class Time {
     public void scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
         RecurringEvent event = new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds);
         recurringEventsList.add(event);
+        scheduledEvents.add(event);
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
