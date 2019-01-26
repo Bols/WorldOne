@@ -33,17 +33,23 @@ public class Time {
     }
 
     public void runUntil(Predicate<Time> stopCriteria) {
+        boolean timeOut = false;
         long startClockTime = System.currentTimeMillis();
         if (scheduledEvents.isEmpty()) {
             throw new RuntimeException("No scheduled events. Simulation not initialized");
         }
-        while (!stopCriteria.test(this)) {
-            for (int i = 0; i <= 100; i++) {  //replace with thread
+        while (!stopCriteria.test(this) && !timeOut) {
+            for (int i = 0; i <= 1000; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.remove();
                 timeMilliSeconds = firstEvent.timeOffsetMilliSeconds;
                 firstEvent.eventHandler.accept(this);
                 firstEvent.afterEvent(this);
                 eventsHandled++;
+            }
+            long realtime = System.currentTimeMillis() - startClockTime;
+            if (scheduledEvents.size() > 100000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
+                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
+                timeOut = true;
             }
         }
 

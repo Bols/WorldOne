@@ -15,7 +15,7 @@ public class Neuron {
     private double voltage_state = 0;
     private long lastFireTime = 0;
     private Time time;
-    private BrainGene genes;
+    BrainGene genes;
     private long lastUpdateState;
     private Set<SynapticConnection> synapticConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
@@ -75,7 +75,7 @@ public class Neuron {
     }
 
 
-    public static class SynapticConnection {
+    public class SynapticConnection {
         private Neuron source;
         private Neuron target;
         private double weight = .5;
@@ -89,7 +89,7 @@ public class Neuron {
         private void sourceNeuronFired(FireEvent fireEvent) {
             long timeDiff = fireEvent.getTime() - target.lastFireTime;
             if (timeDiff < STDP_POST_TIME && timeDiff > 0) {
-                weight = weight - (weight * STDP_FACTOR * STDP_POST_TIME / timeDiff); //linear for now
+                weight = weight - (weight * genes.getStdpFactor() * STDP_POST_TIME / timeDiff); //linear for now
             }
             target.inputChange(weight);
         }
@@ -97,7 +97,7 @@ public class Neuron {
         public void targetNeuronFired(FireEvent fireEvent) {
             long timeDiff = fireEvent.getTime() - source.lastFireTime;
             if (timeDiff < STDP_PRE_TIME && timeDiff > 0) {
-                weight = weight + (weight * STDP_FACTOR * STDP_PRE_TIME / timeDiff); //linear for now
+                weight = weight + (weight * genes.getStdpFactor() * STDP_PRE_TIME / timeDiff); //linear for now
             }
         }
     }
