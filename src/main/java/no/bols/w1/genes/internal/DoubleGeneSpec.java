@@ -7,26 +7,26 @@ import no.bols.w1.genes.DoubleGene;
 import java.util.Random;
 
 
-public class GeneParameterSpec extends GeneSpec<GeneParameterValue> {
+public class DoubleGeneSpec extends GeneSpec<DoubleGeneValue> {
 
     @Getter
     private final double min;
     @Getter
     private final double max;
 
-    public GeneParameterSpec(DoubleGene annotation) {
+    public DoubleGeneSpec(DoubleGene annotation) {
         this.min = annotation.min();
         this.max = annotation.max();
     }
 
-    public GeneParameterSpec(double min, double max) {
+    public DoubleGeneSpec(double min, double max) {
         this.min = min;
         this.max = max;
     }
 
 
-    public GeneParameterValue randomValue() {
-        return new GeneParameterValue(this, new Random().nextDouble() * (max - min) + min);
+    public DoubleGeneValue randomValue() {
+        return new DoubleGeneValue(this, new Random().nextDouble() * (max - min) + min);
 
     }
 

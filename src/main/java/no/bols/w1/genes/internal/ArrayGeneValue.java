@@ -6,21 +6,21 @@ import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class GeneArrayValue<T extends GeneValue> extends GeneValue<T[]> {
+public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
     private final T[] value;
 
-    public GeneArrayValue(T[] value) {
+    public ArrayGeneValue(T[] value) {
         this.value = value;
     }
 
     @Override
-    public GeneArrayValue<T> breed(GeneValue other, double mutationChance) {
+    public ArrayGeneValue<T> breed(GeneValue other, double mutationChance) {
         T[] result = value.clone();
         for (int i = 0; i < value.length; i++) {
-            T otherValue = ((GeneArrayValue<T>) other).getValue()[i];
+            T otherValue = ((ArrayGeneValue<T>) other).getValue()[i];
             result[i] = (T) value[i].breed(otherValue, mutationChance);
         }
-        return new GeneArrayValue<>(result);
+        return new ArrayGeneValue<>(result);
 
     }
 

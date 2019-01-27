@@ -65,8 +65,7 @@ public class World1SimulatorRunner<G> {
 
     private void newBestScore(Pair<WorldScoreWithTrainingHistory, G> newTopScore) {
         this.bestScore = newTopScore;
-        System.out.println("\nNew best score " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
-
+        // System.out.println("\nNew best score " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
     }
 
     public void visualizeScore(Pair<WorldScoreWithTrainingHistory, G> score) {
@@ -101,6 +100,10 @@ public class World1SimulatorRunner<G> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("----------- Result stats ----------------");
+        System.out.println(score.getKey());
+        System.out.println("Real-clock runtime:  " + time.getRealClockRuntime());
+        System.out.println("Events handled: " + time.getEventsHandled());
 
     }
 

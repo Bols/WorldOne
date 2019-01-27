@@ -3,10 +3,7 @@ package no.bols.w1.genes;//
 
 import javafx.util.Pair;
 import lombok.Builder;
-import no.bols.w1.genes.internal.GeneArraySpec;
-import no.bols.w1.genes.internal.GeneMap;
-import no.bols.w1.genes.internal.GeneParameterSpec;
-import no.bols.w1.genes.internal.GeneSpec;
+import no.bols.w1.genes.internal.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -65,6 +62,7 @@ public class Engine<G, S extends Comparable> {
                 topScore = results.first().getKey();
                 topScoreUnchangedGenerations = 0;
                 GeneMap topGene = results.first().getValue();
+                System.out.println("\nNew best score " + topScore + " - " + results.first().getValue().toString());
                 if (bestScoreReceiver != null) {
                     bestScoreReceiver.accept(new Pair(topScore, mapToGene(topGene)));
                 }
@@ -91,7 +89,8 @@ public class Engine<G, S extends Comparable> {
     private Map<String, GeneSpec> mapToGeneSpec(G gene) {
         Map<String, GeneSpec> result = new HashMap<>();
         Map<Class, Class> annotationToSpecMap = new HashMap<>();
-        annotationToSpecMap.put(DoubleGene.class, GeneParameterSpec.class);
+        annotationToSpecMap.put(DoubleGene.class, DoubleGeneSpec.class);
+        annotationToSpecMap.put(BooleanGene.class, BooleanGeneSpec.class);
         for (Field field : gene.getClass().getDeclaredFields()) {
             for (Annotation annotation : field.getAnnotations()) {
                 Class<? extends GeneSpec> matchingSpec = annotationToSpecMap.get(annotation.annotationType());
@@ -99,7 +98,7 @@ public class Engine<G, S extends Comparable> {
                     try {
                         GeneSpec spec = matchingSpec.getConstructor(annotation.annotationType()).newInstance(annotation);
                         if (field.getType().isArray()) {
-                            result.put(field.getName(), new GeneArraySpec(Array.getLength(field.get(gene)), spec));
+                            result.put(field.getName(), new ArrayGeneSpec(Array.getLength(field.get(gene)), spec));
                         } else {
                             result.put(field.getName(), spec);
                         }

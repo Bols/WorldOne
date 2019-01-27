@@ -9,13 +9,10 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Neuron {
-    public static long STDP_PRE_TIME = 100;
-    public static long STDP_POST_TIME = 30;
-    public static double STDP_FACTOR = .3;
     private double voltage_state = 0;
     private long lastFireTime = 0;
     private Time time;
-    BrainGene genes;
+    private BrainGene genes;
     private long lastUpdateState;
     private Set<SynapticConnection> synapticConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
@@ -87,17 +84,22 @@ public class Neuron {
         }
 
         private void sourceNeuronFired(FireEvent fireEvent) {
-            long timeDiff = fireEvent.getTime() - target.lastFireTime;
-            if (timeDiff < STDP_POST_TIME && timeDiff > 0) {
-                weight = weight - (weight * genes.getStdpFactor() * STDP_POST_TIME / timeDiff); //linear for now
+            if (genes.isUseStdp()) {
+                long timeDiff = fireEvent.getTime() - target.lastFireTime;
+                if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
+                    weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
+                }
             }
             target.inputChange(weight);
+
         }
 
         public void targetNeuronFired(FireEvent fireEvent) {
-            long timeDiff = fireEvent.getTime() - source.lastFireTime;
-            if (timeDiff < STDP_PRE_TIME && timeDiff > 0) {
-                weight = weight + (weight * genes.getStdpFactor() * STDP_PRE_TIME / timeDiff); //linear for now
+            if (genes.isUseStdp()) {
+                long timeDiff = fireEvent.getTime() - source.lastFireTime;
+                if (timeDiff < genes.getStdpPreTime() && timeDiff > 0) {
+                    weight = weight + (weight * genes.getStdpFactor() * genes.getStdpPreTime() / timeDiff); //linear for now
+                }
             }
         }
     }

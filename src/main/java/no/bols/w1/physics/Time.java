@@ -14,8 +14,11 @@ public class Time {
     @Getter
     private long timeMilliSeconds;
     private PriorityQueue<Event> scheduledEvents;
+    @Getter
     int eventsHandled;
     private List<RecurringEvent> recurringEventsList = new ArrayList<>();
+    @Getter
+    private long realClockRuntime;
 
     public Time() {
         reset();
@@ -47,11 +50,12 @@ public class Time {
                 eventsHandled++;
             }
             long realtime = System.currentTimeMillis() - startClockTime;
-            if (scheduledEvents.size() > 100000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
-                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
+            if (scheduledEvents.size() > 1000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
+                //System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
                 timeOut = true;
             }
         }
+        realClockRuntime = System.currentTimeMillis() - startClockTime;
 
         //System.out.print("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMilliSeconds / 1000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
     }

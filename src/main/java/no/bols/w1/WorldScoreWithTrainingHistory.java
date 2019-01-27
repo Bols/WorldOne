@@ -41,7 +41,7 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
     @Override
     public String toString() {
         String score = f(bestScore.getScore()) + " dist:" + f(bestScore.getDistanceTraveled()) + " food:" + bestScore.getFoodEaten();
-        String historyString = history.size() < 3 ? "" : "[" + history.stream().map(h -> f(h.getScore())).collect(Collectors.joining(",")) + "]";
+        String historyString = history.size() < 2 ? "" : "[" + history.stream().map(h -> f(h.getScore())).collect(Collectors.joining(",")) + "]";
         return score + historyString;
     }
 

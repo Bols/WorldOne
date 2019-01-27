@@ -24,9 +24,9 @@ public class GeneMap {
 
     @Override
     public String toString() {
-        return genes.entrySet().stream().
-                map(e -> e.getKey() + ":" + e.toString())
-                .collect(Collectors.joining(","));
+        return "{" + genes.entrySet().stream().
+                map(e -> e.toString())
+                .collect(Collectors.joining(",")) + "}";
     }
 
     @Override
