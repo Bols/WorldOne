@@ -45,6 +45,12 @@ public class Engine<G, S extends Comparable> {
         while (topScoreUnchangedGenerations < stableGenerationsLimit) {
             generations++;
             List<Pair<S, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
+//            System.out.println("-------------------- Top list generation "+generations);
+//            for (Pair<S, GeneMap> sGeneMapPair : topList) {
+//                System.out.println(sGeneMapPair.getKey()+" "+sGeneMapPair.getValue());
+//            }
+//            System.out.println("-----------");
+
 
             Set<GeneMap> newGeneration = new HashSet<>();
             for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
@@ -158,8 +164,9 @@ public class Engine<G, S extends Comparable> {
 
         @Override
         public Pair<S, GeneMap> call() {
-            //System.out.println("Running scenario " + genes.toString());
-            return new Pair<>(evalFunction.apply(mapToGene(genes)), genes);
+            S score = evalFunction.apply(mapToGene(genes));
+            //System.out.println(score.toString() + " " + genes.toString());
+            return new Pair<>(score, genes);
         }
 
     }

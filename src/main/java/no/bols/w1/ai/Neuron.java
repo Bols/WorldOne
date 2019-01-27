@@ -46,7 +46,7 @@ public class Neuron {
 
     private void updateState() {
         long now = time.getTimeMilliSeconds();
-        voltage_state = voltage_state * (1 - (now - lastUpdateState) * genes.getLeakPerMs());
+        voltage_state = voltage_state - voltage_state * (now - lastUpdateState) * genes.getLeakPerMs();
         lastUpdateState = now;
     }
 

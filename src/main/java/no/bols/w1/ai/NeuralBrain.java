@@ -1,6 +1,7 @@
 package no.bols.w1.ai;//
 //
 
+import lombok.Getter;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
@@ -20,6 +21,7 @@ import no.bols.w1.physics.Time;
  * <li>utmatting av neuroner for å begrense aktivitet?</li>
  **/
 public class NeuralBrain extends Brain {
+    @Getter
     final BrainGene genes;
     private final Neuron foodDistanceInput;
     private final Neuron foodSensorInput;
