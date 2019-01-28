@@ -27,13 +27,15 @@ public class Engine<G, S extends Comparable> {
     @Builder.Default
     private int generationUsableSize = 16;
     @Builder.Default
-    private double mutationChance = .2;
+    private double mutationChance = .3;
     private Consumer<Pair<S, G>> bestScoreReceiver;
     private Consumer<S> otherScoresReceiver;
 
 
     public List<Pair<S, G>> runGeneticAlgorithmUntilStable() {
         Map<String, GeneSpec> geneSpec = mapToGeneSpec(gene);
+        double effectiveMutationchance = this.mutationChance / geneSpec.size();
+
         long startTime = System.currentTimeMillis();
         int generations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool();
@@ -54,12 +56,12 @@ public class Engine<G, S extends Comparable> {
 
             Set<GeneMap> newGeneration = new HashSet<>();
             for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
-                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue(), mutationChance));
+                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue(), effectiveMutationchance));
             }
             topList.forEach(parent1 ->
             {
                 GeneMap parent2 = topList.get(new Random().nextInt(generationUsableSize)).getValue();
-                GeneMap offspring = parent1.getValue().breed(parent2, mutationChance);
+                GeneMap offspring = parent1.getValue().breed(parent2, effectiveMutationchance);
                 newGeneration.add(offspring);
             });
             List<Pair<S, GeneMap>> newResults = simulateCandidates(executorService, newGeneration);

@@ -44,8 +44,7 @@ public class World1SimulatorRunner<G> {
     public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
                 .initialPopulation(100)
-                .generationUsableSize(20)
-                .mutationChance(.2)
+                .generationUsableSize(50)
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)

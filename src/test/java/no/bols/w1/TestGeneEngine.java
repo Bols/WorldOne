@@ -15,7 +15,7 @@ import no.bols.w1.physics.Time;
  */
 public class TestGeneEngine
         extends TestCase {
-    public static final int TUNE_FACTOR_NUM = 5;
+    public static final int TUNE_FACTOR_NUM = 10;
 
 
     public TestGeneEngine(String testName) {
@@ -52,7 +52,7 @@ public class TestGeneEngine
             if (oneleg.getFoodProximityOutput() < genes.stopDistance) {
                 oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf() * genes.speedEnum.speedFactor);
             } else {
-                oneleg.motorOutput(genes.stopSpeed);
+                oneleg.motorOutput(genes.stopSpeed / 2);
             }
         }
 
