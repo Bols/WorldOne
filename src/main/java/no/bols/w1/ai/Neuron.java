@@ -84,22 +84,18 @@ public class Neuron {
         }
 
         private void sourceNeuronFired(FireEvent fireEvent) {
-            if (genes.isUseStdp()) {
-                long timeDiff = fireEvent.getTime() - target.lastFireTime;
-                if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
-                    weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
-                }
+            long timeDiff = fireEvent.getTime() - target.lastFireTime;
+            if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
+                weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
             }
             target.inputChange(weight);
 
         }
 
         public void targetNeuronFired(FireEvent fireEvent) {
-            if (genes.isUseStdp()) {
-                long timeDiff = fireEvent.getTime() - source.lastFireTime;
-                if (timeDiff < genes.getStdpPreTime() && timeDiff > 0) {
-                    weight = weight + (weight * genes.getStdpFactor() * genes.getStdpPreTime() / timeDiff); //linear for now
-                }
+            long timeDiff = fireEvent.getTime() - source.lastFireTime;
+            if (timeDiff < genes.getStdpPreTime() && timeDiff > 0) {
+                weight = weight + (weight * genes.getStdpFactor() * genes.getStdpPreTime() / timeDiff); //linear for now
             }
         }
     }

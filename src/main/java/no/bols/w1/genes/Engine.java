@@ -97,14 +97,15 @@ public class Engine<G, S extends Comparable> {
         Map<Class, Class> annotationToSpecMap = new HashMap<>();
         annotationToSpecMap.put(DoubleGene.class, DoubleGeneSpec.class);
         annotationToSpecMap.put(BooleanGene.class, BooleanGeneSpec.class);
+        annotationToSpecMap.put(EnumGene.class, EnumGeneSpec.class);
         for (Field field : gene.getClass().getDeclaredFields()) {
             for (Annotation annotation : field.getAnnotations()) {
                 Class<? extends GeneSpec> matchingSpec = annotationToSpecMap.get(annotation.annotationType());
                 if (matchingSpec != null) {
                     try {
-                        GeneSpec spec = matchingSpec.getConstructor(annotation.annotationType()).newInstance(annotation);
+                        GeneSpec spec = matchingSpec.getConstructor(annotation.annotationType(), Field.class).newInstance(annotation, field);
                         if (field.getType().isArray()) {
-                            result.put(field.getName(), new ArrayGeneSpec(Array.getLength(field.get(gene)), spec));
+                            result.put(field.getName(), new ArrayGeneSpec(Array.getLength(field.get(gene)), spec, field, annotation));
                         } else {
                             result.put(field.getName(), spec);
                         }

@@ -3,15 +3,12 @@ package no.bols.w1.genes.internal;//
 
 import lombok.EqualsAndHashCode;
 
-import java.util.Random;
-
 @EqualsAndHashCode
 public class DoubleGeneValue extends GeneValue<Double> {
 
 
     private DoubleGeneSpec geneParameterSpec;
     private final double value;
-    private static Random random = new Random();
 
     public DoubleGeneValue(DoubleGeneSpec geneParameterSpec, double childVal) {
         this.geneParameterSpec = geneParameterSpec;
@@ -39,10 +36,6 @@ public class DoubleGeneValue extends GeneValue<Double> {
             }
             return geneParameterSpec.randomValue();
         }
-    }
-
-    protected boolean chance(double percent) {
-        return random.nextDouble() < percent;
     }
 
     @Override

@@ -3,7 +3,9 @@ package no.bols.w1.genes.internal;//
 
 import lombok.Getter;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 
 public class ArrayGeneSpec<T extends GeneSpec> extends GeneSpec<ArrayGeneValue> {
     @Getter
@@ -11,7 +13,8 @@ public class ArrayGeneSpec<T extends GeneSpec> extends GeneSpec<ArrayGeneValue> 
     @Getter
     private final GeneSpec elementSpec;
 
-    public ArrayGeneSpec(int length, GeneSpec elementSpec) {
+    public ArrayGeneSpec(int length, GeneSpec elementSpec, Field f, Annotation annotation) {
+        super(annotation, f);
         this.length = length;
         this.elementSpec = elementSpec;
     }

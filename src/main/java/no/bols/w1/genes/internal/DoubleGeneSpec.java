@@ -4,6 +4,7 @@ package no.bols.w1.genes.internal;//
 import lombok.Getter;
 import no.bols.w1.genes.DoubleGene;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 
 
@@ -14,14 +15,10 @@ public class DoubleGeneSpec extends GeneSpec<DoubleGeneValue> {
     @Getter
     private final double max;
 
-    public DoubleGeneSpec(DoubleGene annotation) {
+    public DoubleGeneSpec(DoubleGene annotation, Field field) {
+        super(annotation, field);
         this.min = annotation.min();
         this.max = annotation.max();
-    }
-
-    public DoubleGeneSpec(double min, double max) {
-        this.min = min;
-        this.max = max;
     }
 
 

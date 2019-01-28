@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import lombok.ToString;
 import no.bols.w1.genes.DoubleGene;
+import no.bols.w1.genes.EnumGene;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
@@ -49,7 +50,7 @@ public class TestGeneEngine
 
         private void moveUntilNextToFood(Time time) {
             if (oneleg.getFoodProximityOutput() < genes.stopDistance) {
-                oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf());
+                oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf() * genes.speedEnum.speedFactor);
             } else {
                 oneleg.motorOutput(genes.stopSpeed);
             }
@@ -75,6 +76,19 @@ public class TestGeneEngine
         @DoubleGene(min = .0, max = 1.0)
         public double[] moveParam = new double[TUNE_FACTOR_NUM];
 
+        @EnumGene
+        public SpeedGene speedEnum;
+
+
+    }
+
+    public enum SpeedGene {
+        slow(.3), medium(.5), fast(1.0);
+        private double speedFactor;
+
+        SpeedGene(double speedFactor) {
+            this.speedFactor = speedFactor;
+        }
     }
 
     private class TestBrainFactory implements BrainFactory<TestGenes> {
