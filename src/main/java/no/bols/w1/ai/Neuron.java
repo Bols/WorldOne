@@ -23,13 +23,16 @@ public class Neuron {
     }
 
     private void inputChange(double value) {
-        double normalized_val = Math.min(1.0, Math.max(value, 0.0));
-        updateState();
-        voltage_state += normalized_val * genes.getExhibitionFactor();
+        updateStateToNow();
+        voltage_state += normalizeValue(value) * genes.getExhibitionFactor();
         if (voltage_state > genes.getFireTreshold()) {
-            voltage_state = 0; //TODO
+            voltage_state = genes.getShortTimeDepression();
             time.scheduleEvent(e -> fire(), 1);
         }
+    }
+
+    private double normalizeValue(double value) {
+        return Math.min(1.0, Math.max(value, 0.0));
     }
 
     private void fire() {
@@ -44,7 +47,7 @@ public class Neuron {
     }
 
 
-    private void updateState() {
+    private void updateStateToNow() {
         long now = time.getTimeMilliSeconds();
         voltage_state = voltage_state - voltage_state * (now - lastUpdateState) * genes.getLeakPerMs();
         lastUpdateState = now;

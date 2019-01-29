@@ -3,6 +3,7 @@ package no.bols.w1.physics;
 
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
@@ -46,7 +47,7 @@ public class JfxVisualize extends Application {
         }
 
         scene.addEventHandler(KeyEvent.KEY_PRESSED, t -> {
-            stage.close();
+            Platform.exit();
         });
         stage.setScene(scene);
         stage.show();

@@ -13,6 +13,7 @@ import no.bols.w1.physics.World;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Builder
@@ -82,8 +83,12 @@ public class World1SimulatorRunner<G> {
             }
             time.reset();
             World simulationWorld = new World(time, blankBrain);
-            graphEvent = time.scheduleRecurringEvent(t ->
-                    jfxVisualize.addDataPoint("I" + scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition()), 100);
+            AtomicInteger eventsHandledSinceLastRound=new AtomicInteger(0);
+            graphEvent = time.scheduleRecurringEvent(t -> {
+                jfxVisualize.addDataPoint("I" + scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition());
+                eventsHandledSinceLastRound.set(simulationWorld.getTime().getEventsHandled()-eventsHandledSinceLastRound.get());
+                jfxVisualize.addDataPoint("Events"+ scoreList.getHistory().size(), t.getTimeMilliSeconds(), eventsHandledSinceLastRound.get()/100.0);
+            }, 100);
             time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
         } while (scoreList.lastScoreWasImprovement());
