@@ -20,6 +20,8 @@ public class Time {
     @Getter
     private long realClockRuntime;
 
+    private int neuronFireCountStat = 0;
+
     public Time() {
         reset();
     }
@@ -71,6 +73,10 @@ public class Time {
         recurringEventsList.remove(event);
     }
 
+    public int getNeuronFireCountStat() {
+        return neuronFireCountStat;
+    }
+
 
     @AllArgsConstructor
     private static class Event implements Comparable<Event> {
@@ -97,5 +103,9 @@ public class Time {
         public void afterEvent(Time time) {
             time.scheduledEvents.add(new RecurringEvent(eventHandler, time.getTimeMilliSeconds() + intervalMilliseconds, intervalMilliseconds));
         }
+    }
+
+    public void addNeuronFireCountStat() {
+        this.neuronFireCountStat++;
     }
 }

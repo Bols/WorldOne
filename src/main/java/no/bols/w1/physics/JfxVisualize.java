@@ -3,12 +3,13 @@ package no.bols.w1.physics;
 
 
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.geometry.Orientation;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 
@@ -18,36 +19,47 @@ import java.util.List;
 import java.util.Map;
 
 public class JfxVisualize extends Application {
-    Map<String, List<Pair<Long, Double>>> dataMap = new HashMap<>();
+    Map<String, Map<Integer, List<Pair<Long, Double>>>> dataMap = new HashMap<>();
 
-    public void addDataPoint(String stat, long timeMs, double position) {
+    public void addDataPoint(String stat, int iteration, long timeMs, double position) {
         if (dataMap.get(stat) == null) {
-            dataMap.put(stat, new ArrayList<>());
+            dataMap.put(stat, new HashMap<>());
         }
-        dataMap.get(stat).add(new Pair(timeMs, position));
+        if (dataMap.get(stat).get(iteration) == null) {
+            dataMap.get(stat).put(iteration, new ArrayList<>());
+        }
+        dataMap.get(stat).get(iteration).add(new Pair(timeMs, position));
     }
 
 
     @Override
     public void start(Stage stage) {
-        final NumberAxis xAxis = new NumberAxis();
-        final NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Time");
-        final LineChart<Number, Number> lineChart =
-                new LineChart<Number, Number>(xAxis, yAxis);
-        lineChart.setCreateSymbols(false);
-        Scene scene = new Scene(lineChart, 1600, 1000);
+        List<LineChart> stats = new ArrayList<>();
         for (String stat : dataMap.keySet()) {
-            XYChart.Series positionSeries = new XYChart.Series();
-            positionSeries.setName(stat);
-            for (Pair<Long, Double> integerDoublePair : dataMap.get(stat)) {
-                positionSeries.getData().add(new XYChart.Data(integerDoublePair.getKey() / 1000.0, integerDoublePair.getValue()));
+            final NumberAxis xAxis = new NumberAxis();
+            final NumberAxis yAxis = new NumberAxis();
+            xAxis.setLabel("Time");
+            yAxis.setLabel(stat);
+            final LineChart<Number, Number> lineChart =
+                    new LineChart<>(xAxis, yAxis);
+            lineChart.setCreateSymbols(false);
+
+            for (int iteration : dataMap.get(stat).keySet()) {
+                XYChart.Series positionSeries = new XYChart.Series();
+                positionSeries.setName(String.valueOf(iteration));
+                for (Pair<Long, Double> integerDoublePair : dataMap.get(stat).get(iteration)) {
+                    positionSeries.getData().add(new XYChart.Data(integerDoublePair.getKey() / 1000.0, integerDoublePair.getValue()));
+                }
+                lineChart.getData().add(positionSeries);
             }
-            lineChart.getData().add(positionSeries);
+            stats.add(lineChart);
         }
 
+        FlowPane root = new FlowPane(Orientation.VERTICAL);
+        root.getChildren().addAll(stats);
+        Scene scene = new Scene(root, 1600, 1000);
         scene.addEventHandler(KeyEvent.KEY_PRESSED, t -> {
-            Platform.exit();
+            stage.close();
         });
         stage.setScene(scene);
         stage.show();

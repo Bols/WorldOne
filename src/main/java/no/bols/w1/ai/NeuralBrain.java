@@ -19,6 +19,8 @@ import no.bols.w1.physics.Time;
  * <li>innføre nye neuroner - random?</li>
  * <li>gro nye synapser  - random?</li>
  * <li>utmatting av neuroner for å begrense aktivitet?</li>
+ * <li>Innføre regioner med ulike regler for feedback-synapser og andre regler. Columns? </li>
+ * <li>Innføre et "klokkesignal" som trigger bølger gjennom regioner - </li>
  **/
 public class NeuralBrain extends Brain {
     @Getter

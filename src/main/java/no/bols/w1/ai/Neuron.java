@@ -14,7 +14,7 @@ public class Neuron {
     private Time time;
     private BrainGene genes;
     private long lastUpdateState;
-    private Set<SynapticConnection> synapticConnections = new HashSet<>();
+    private Set<SynapticConnection> incomingConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
 
     public Neuron(Time time, BrainGene genes) {
@@ -22,13 +22,22 @@ public class Neuron {
         this.genes = genes;
     }
 
-    private void inputChange(double value) {
+    private void voltageUpdate(double value) {
         updateStateToNow();
-        voltage_state += normalizeValue(value) * genes.getExhibitionFactor();
+        voltage_state += normalizeValue(value) * genes.getExhibitionFactor() * refractoryPeriodFactor();
         if (voltage_state > genes.getFireTreshold()) {
+            lastFireTime = time.getTimeMilliSeconds();
             voltage_state = genes.getShortTimeDepression();
             time.scheduleEvent(e -> fire(), 1);
         }
+    }
+
+    private double refractoryPeriodFactor() {
+        long timeSinceLastFire = time.getTimeMilliSeconds() - lastFireTime;
+        if (timeSinceLastFire <= 10) {
+            return 0;
+        }
+        return 1 - (10 / timeSinceLastFire);
     }
 
     private double normalizeValue(double value) {
@@ -37,11 +46,11 @@ public class Neuron {
 
     private void fire() {
         FireEvent fireEvent = new FireEvent(time.getTimeMilliSeconds(), this);
-        lastFireTime = time.getTimeMilliSeconds();
+        time.addNeuronFireCountStat();
         for (Consumer<FireEvent> fireListener : fireListeners) {
             fireListener.accept(fireEvent);
         }
-        for (SynapticConnection synapticConnection : synapticConnections) {
+        for (SynapticConnection synapticConnection : incomingConnections) {
             synapticConnection.targetNeuronFired(fireEvent);
         }
     }
@@ -62,12 +71,12 @@ public class Neuron {
 
     public void addProportionalInputTimeEvent(Supplier<Double> input) {
         time.scheduleRecurringEvent(t -> {
-            this.inputChange(input.get());
+            this.voltageUpdate(input.get());
         }, 10);
     }
 
     public void addSynapticSource(Neuron source) {
-        synapticConnections.add(new SynapticConnection(source, this));
+        incomingConnections.add(new SynapticConnection(source, this));
     }
 
     public void addFireListener(Consumer<FireEvent> listener) {
@@ -91,7 +100,7 @@ public class Neuron {
             if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
                 weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
             }
-            target.inputChange(weight);
+            target.voltageUpdate(weight);
 
         }
 

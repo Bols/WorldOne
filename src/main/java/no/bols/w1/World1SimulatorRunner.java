@@ -11,17 +11,26 @@ import no.bols.w1.physics.JfxVisualize;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-@Builder
 public class World1SimulatorRunner<G> {
     private int scenarioTimeMs;
+    private long realStartTime = System.currentTimeMillis();
     BrainFactory<G> brainFactory;
     private JfxVisualize jfxVisualize;
     private Pair<WorldScoreWithTrainingHistory, G> bestScore;
+
+    List<Pair<Long, Double>> bestScoreHistory = new ArrayList<>();
+
+    @Builder
+    public World1SimulatorRunner(int scenarioTimeMs, BrainFactory<G> brainFactory) {
+        this.scenarioTimeMs = scenarioTimeMs;
+        this.brainFactory = brainFactory;
+    }
 
     private WorldScoreWithTrainingHistory evaluate(G genes) {
         Time time = new Time();
@@ -64,7 +73,9 @@ public class World1SimulatorRunner<G> {
 
 
     private void newBestScore(Pair<WorldScoreWithTrainingHistory, G> newTopScore) {
+        bestScoreHistory.add(new Pair((System.currentTimeMillis() - realStartTime), newTopScore.getKey().getBestScore().getScore()));
         this.bestScore = newTopScore;
+
         // System.out.println("\nNew best score " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
     }
 
@@ -78,22 +89,26 @@ public class World1SimulatorRunner<G> {
         WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
         Time.RecurringEvent graphEvent = null;
         do {
+
             if (graphEvent != null) {
                 time.unScheduleRecurringEvent(graphEvent);
             }
             time.reset();
             World simulationWorld = new World(time, blankBrain);
-            AtomicInteger eventsHandledSinceLastRound=new AtomicInteger(0);
+            AtomicInteger neuronFires = new AtomicInteger(0);
             graphEvent = time.scheduleRecurringEvent(t -> {
-                jfxVisualize.addDataPoint("I" + scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition());
-                eventsHandledSinceLastRound.set(simulationWorld.getTime().getEventsHandled()-eventsHandledSinceLastRound.get());
-                jfxVisualize.addDataPoint("Events"+ scoreList.getHistory().size(), t.getTimeMilliSeconds(), eventsHandledSinceLastRound.get()/100.0);
+                jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition());
+                jfxVisualize.addDataPoint("Fire", scoreList.getHistory().size(), t.getTimeMilliSeconds(), (simulationWorld.getTime().getNeuronFireCountStat() - neuronFires.get()));
+                neuronFires.set(simulationWorld.getTime().getNeuronFireCountStat());
             }, 100);
+
             time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
         } while (scoreList.lastScoreWasImprovement());
 
-
+        for (Pair<Long, Double> longDoublePair : bestScoreHistory) {
+            jfxVisualize.addDataPoint("Gene tuning best score", 0, longDoublePair.getKey(), longDoublePair.getValue());
+        }
         Platform.runLater(() -> {
             Stage stage = new Stage();
             stage.setOnHiding(event -> countDownLatch.countDown());
@@ -104,11 +119,12 @@ public class World1SimulatorRunner<G> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        Platform.exit();
         System.out.println("----------- Result stats ----------------");
         System.out.println(score.getKey());
         System.out.println("Real-clock runtime:  " + time.getRealClockRuntime());
         System.out.println("Events handled: " + time.getEventsHandled());
-
+        System.out.println("Neurons fired: " + time.getNeuronFireCountStat());
     }
 
 }
