@@ -43,8 +43,9 @@ public class World1SimulatorRunner<G> {
         WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, brain);
         do {
             time.reset();
+            Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, brain);
-            time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
+            time.runUntil(t -> time.timeSince(startTime) > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
         } while (scoreList.lastScoreWasImprovement());
         return scoreList;
@@ -94,15 +95,16 @@ public class World1SimulatorRunner<G> {
                 time.unScheduleRecurringEvent(graphEvent);
             }
             time.reset();
+            Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, blankBrain);
             AtomicInteger neuronFires = new AtomicInteger(0);
             graphEvent = time.scheduleRecurringEvent(t -> {
-                jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getTimeMilliSeconds(), simulationWorld.getOneleg().getPosition());
-                jfxVisualize.addDataPoint("Fire", scoreList.getHistory().size(), t.getTimeMilliSeconds(), (simulationWorld.getTime().getNeuronFireCountStat() - neuronFires.get()));
+                jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
+                jfxVisualize.addDataPoint("Fire", scoreList.getHistory().size(), t.getSimulatedTime().ms(), (simulationWorld.getTime().getNeuronFireCountStat() - neuronFires.get()));
                 neuronFires.set(simulationWorld.getTime().getNeuronFireCountStat());
             }, 100);
 
-            time.runUntil(t -> simulationWorld.getTime().getTimeMilliSeconds() > scenarioTimeMs);
+            time.runUntil(t -> t.timeSince(startTime) > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
         } while (scoreList.lastScoreWasImprovement());
 

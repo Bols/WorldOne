@@ -10,30 +10,31 @@ import java.util.function.Supplier;
 
 public class Neuron {
     private double voltage_state = 0;
-    private long lastFireTime = 0;
+    private Time.Instant lastFireTime;
     private Time time;
     private BrainGene genes;
-    private long lastUpdateState;
+    private Time.Instant lastUpdateState;
     private Set<SynapticConnection> incomingConnections = new HashSet<>();
     private Set<Consumer<FireEvent>> fireListeners = new HashSet<>();
 
     public Neuron(Time time, BrainGene genes) {
         this.time = time;
         this.genes = genes;
+
     }
 
     private void voltageUpdate(double value) {
         updateStateToNow();
         voltage_state += normalizeValue(value) * genes.getExhibitionFactor() * refractoryPeriodFactor();
         if (voltage_state > genes.getFireTreshold()) {
-            lastFireTime = time.getTimeMilliSeconds();
+            lastFireTime = time.getSimulatedTime();
             voltage_state = genes.getShortTimeDepression();
             time.scheduleEvent(e -> fire(), 1);
         }
     }
 
     private double refractoryPeriodFactor() {
-        long timeSinceLastFire = time.getTimeMilliSeconds() - lastFireTime;
+        long timeSinceLastFire = time.timeSince(lastFireTime);
         if (timeSinceLastFire <= 10) {
             return 0;
         }
@@ -45,7 +46,7 @@ public class Neuron {
     }
 
     private void fire() {
-        FireEvent fireEvent = new FireEvent(time.getTimeMilliSeconds(), this);
+        FireEvent fireEvent = new FireEvent(time.getSimulatedTime(), this);
         time.addNeuronFireCountStat();
         for (Consumer<FireEvent> fireListener : fireListeners) {
             fireListener.accept(fireEvent);
@@ -57,14 +58,13 @@ public class Neuron {
 
 
     private void updateStateToNow() {
-        long now = time.getTimeMilliSeconds();
-        voltage_state = voltage_state - voltage_state * (now - lastUpdateState) * genes.getLeakPerMs();
-        lastUpdateState = now;
+        voltage_state = voltage_state - voltage_state * (time.timeSince(lastUpdateState)) * genes.getLeakPerMs();
+        lastUpdateState = time.getSimulatedTime();
     }
 
     public void addProportionalOutputTimeEvent(Consumer<Double> output) {
         time.scheduleRecurringEvent(t -> {
-            boolean firedRecently = t.getTimeMilliSeconds() - lastFireTime < 50;
+            boolean firedRecently = lastFireTime != null && t.timeSince(lastFireTime) < 50;
             output.accept(firedRecently ? 1.0 : 0.0);
         }, 10);
     }
@@ -96,7 +96,7 @@ public class Neuron {
         }
 
         private void sourceNeuronFired(FireEvent fireEvent) {
-            long timeDiff = fireEvent.getTime() - target.lastFireTime;
+            long timeDiff = fireEvent.getTime().timeSince(target.lastFireTime);
             if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
                 weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
             }
@@ -105,7 +105,7 @@ public class Neuron {
         }
 
         public void targetNeuronFired(FireEvent fireEvent) {
-            long timeDiff = fireEvent.getTime() - source.lastFireTime;
+            long timeDiff = fireEvent.getTime().timeSince(source.lastFireTime);
             if (timeDiff < genes.getStdpPreTime() && timeDiff > 0) {
                 weight = weight + (weight * genes.getStdpFactor() * genes.getStdpPreTime() / timeDiff); //linear for now
             }

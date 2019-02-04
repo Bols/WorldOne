@@ -7,7 +7,7 @@ public class Oneleg extends PhysObject {
     private static double MAX_SPEED = 1; //positions pr. second
     private static double EAT_SPEED = .5; //amount pr second
     private Brain brain;
-    private long lastPositionTime = 0;
+    private Time.Instant lastPositionTime;
     @Getter
     private double lastMotorOutput;
 
@@ -19,7 +19,7 @@ public class Oneleg extends PhysObject {
 
     public double getFoodProximityOutput() {
         updateState();
-        return 1.0 / (Math.pow(2, distance(world.getCurrentFood())));
+        return 1.0 / (Math.pow(1.2, distance(world.getCurrentFood())));
     }
 
     public double getEatingOutput() {
@@ -38,14 +38,14 @@ public class Oneleg extends PhysObject {
 
 
     private void updateState() {
-        long newTimeMs = world.getTime().getTimeMilliSeconds();
-        long diffTimeMs = newTimeMs - lastPositionTime;
+        Time.Instant now = world.getTime().getSimulatedTime();
+        long diffTimeMs = now.timeSince(lastPositionTime);
         position = position + (lastMotorOutput * MAX_SPEED * diffTimeMs / 1000);
         if (canEat()) {
             world.getCurrentFood().eat(EAT_SPEED * diffTimeMs / 1000);
         }
 
-        lastPositionTime = newTimeMs;
+        lastPositionTime = now;
     }
 
     private boolean canEat() {

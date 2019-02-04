@@ -11,8 +11,8 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Time {
-    @Getter
     private long timeMilliSeconds;
+    private long iteration = 0;
     private PriorityQueue<Event> scheduledEvents;
     @Getter
     int eventsHandled;
@@ -27,11 +27,11 @@ public class Time {
     }
 
     public void scheduleEvent(Consumer<Time> eventHandler, long timeOffsetMilliseconds) {
-        scheduledEvents.add(new Event(eventHandler, getTimeMilliSeconds() + timeOffsetMilliseconds));
+        scheduledEvents.add(new Event(eventHandler, timeOffsetMilliseconds + timeOffsetMilliseconds));
     }
 
     public RecurringEvent scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
-        RecurringEvent event = new RecurringEvent(eventHandler, getTimeMilliSeconds() + milliseconds, milliseconds);
+        RecurringEvent event = new RecurringEvent(eventHandler, timeMilliSeconds + milliseconds, milliseconds);
         recurringEventsList.add(event);
         scheduledEvents.add(event);
         return event;
@@ -63,10 +63,13 @@ public class Time {
     }
 
     public void reset() {
+        iteration++;
         timeMilliSeconds = 0;
         scheduledEvents = new PriorityQueue<>();
         eventsHandled = 0;
         recurringEventsList.forEach(scheduledEvents::add);
+        neuronFireCountStat = 0;
+
     }
 
     public void unScheduleRecurringEvent(RecurringEvent event) {
@@ -75,6 +78,14 @@ public class Time {
 
     public int getNeuronFireCountStat() {
         return neuronFireCountStat;
+    }
+
+    public Instant getSimulatedTime() {
+        return new Instant(iteration, timeMilliSeconds);
+    }
+
+    public long timeSince(Instant startTime) {
+        return getSimulatedTime().timeSince(startTime);
     }
 
 
@@ -101,11 +112,37 @@ public class Time {
 
         @Override
         public void afterEvent(Time time) {
-            time.scheduledEvents.add(new RecurringEvent(eventHandler, time.getTimeMilliSeconds() + intervalMilliseconds, intervalMilliseconds));
+            time.scheduledEvents.add(new RecurringEvent(eventHandler, time.timeMilliSeconds + intervalMilliseconds, intervalMilliseconds));
         }
     }
 
     public void addNeuronFireCountStat() {
         this.neuronFireCountStat++;
+    }
+
+
+    public static class Instant {
+        private long timeMs;
+        private long iteration;
+
+        Instant(long iteration, long timeMs) {
+            this.timeMs = timeMs;
+            this.iteration = iteration;
+        }
+
+        public long ms() {
+            return timeMs;
+        }
+
+        public long timeSince(Instant comparedTime) {
+            if (comparedTime == null) {
+                return timeMs;
+            }
+            if (comparedTime.iteration == iteration) {
+                return timeMs - comparedTime.timeMs;
+            }
+            // If in different iterations, use start time instead, as comparedTime is meaningless
+            return timeMs;
+        }
     }
 }

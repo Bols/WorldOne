@@ -39,8 +39,9 @@ public class Engine<G, S extends Comparable> {
         long startTime = System.currentTimeMillis();
         int generations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool();
-        Set<GeneMap> candidates = initialPopulation(geneSpec);
         SortedSet<Pair<S, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
+
+        Set<GeneMap> candidates = initialPopulation(geneSpec);
         results.addAll(simulateCandidates(executorService, candidates));
         int topScoreUnchangedGenerations = 0;
         S topScore = null;
