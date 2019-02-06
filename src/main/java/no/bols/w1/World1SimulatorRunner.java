@@ -44,11 +44,11 @@ public class World1SimulatorRunner<G> {
     private WorldScoreWithTrainingHistory runScenarioTrainingUntilStable(Time time, Brain brain) {
         WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, brain);
         do {
-            time.reset();
             Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, brain);
             time.runUntil(t -> time.timeSince(startTime) > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
+            time.reset();
         } while (scoreList.lastScoreWasImprovement());
         return scoreList;
     }

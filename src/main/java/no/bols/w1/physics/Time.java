@@ -27,7 +27,7 @@ public class Time {
     }
 
     public void scheduleEvent(Consumer<Time> eventHandler, long timeOffsetMilliseconds) {
-        scheduledEvents.add(new Event(eventHandler, timeOffsetMilliseconds + timeOffsetMilliseconds));
+        scheduledEvents.add(new Event(eventHandler, timeMilliSeconds + timeOffsetMilliseconds));
     }
 
     public RecurringEvent scheduleRecurringEvent(Consumer<Time> eventHandler, long milliseconds) {
@@ -52,10 +52,10 @@ public class Time {
                 eventsHandled++;
             }
             long realtime = System.currentTimeMillis() - startClockTime;
-            if (scheduledEvents.size() > 10000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
-                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
-                timeOut = true;
-            }
+//            if (scheduledEvents.size() > 10000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
+//                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
+//                timeOut = true;
+//            }
         }
         realClockRuntime = System.currentTimeMillis() - startClockTime;
 

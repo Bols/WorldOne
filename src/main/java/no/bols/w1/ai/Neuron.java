@@ -98,7 +98,7 @@ public class Neuron {
         private void sourceNeuronFired(FireEvent fireEvent) {
             long timeDiff = fireEvent.getTime().timeSince(target.lastFireTime);
             if (timeDiff < genes.getStdpPostTime() && timeDiff > 0) {
-                weight = weight - (weight * genes.getStdpFactor() * genes.getStdpPostTime() / timeDiff); //linear for now
+                weight = weight - (weight * genes.getStdpFactor() * (genes.getStdpPostTime() - timeDiff) / genes.getStdpPostTime()); //linear for now
             }
             target.voltageUpdate(weight);
 
@@ -107,7 +107,7 @@ public class Neuron {
         public void targetNeuronFired(FireEvent fireEvent) {
             long timeDiff = fireEvent.getTime().timeSince(source.lastFireTime);
             if (timeDiff < genes.getStdpPreTime() && timeDiff > 0) {
-                weight = weight + (weight * genes.getStdpFactor() * genes.getStdpPreTime() / timeDiff); //linear for now
+                weight = weight + (weight * genes.getStdpFactor() * (genes.getStdpPreTime() - timeDiff) / genes.getStdpPreTime()); //linear for now
             }
         }
     }
