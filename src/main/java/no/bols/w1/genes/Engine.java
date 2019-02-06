@@ -22,6 +22,7 @@ public class Engine<G, S extends Comparable> {
     private G gene;
     @Builder.Default
     private int initialPopulation = 64;
+    private S minimumInitialPopulationScore;
     @Builder.Default
     private int stableGenerationsLimit = 20;
     @Builder.Default
@@ -29,6 +30,9 @@ public class Engine<G, S extends Comparable> {
     @Builder.Default
     private double mutationChance = .3;
     private Consumer<Pair<S, G>> bestScoreReceiver;
+    @Builder.Default
+    private int parallellism = Runtime.getRuntime().availableProcessors();
+
     private Consumer<S> otherScoresReceiver;
 
 
@@ -38,11 +42,14 @@ public class Engine<G, S extends Comparable> {
 
         long startTime = System.currentTimeMillis();
         int generations = 0;
-        ExecutorService executorService = Executors.newWorkStealingPool();
+        ExecutorService executorService = Executors.newWorkStealingPool(parallellism);
         SortedSet<Pair<S, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
-
-        Set<GeneMap> candidates = initialPopulation(geneSpec);
-        results.addAll(simulateCandidates(executorService, candidates));
+        do {
+            Set<GeneMap> candidates = createInitialPopulation(geneSpec, parallellism);
+            results.addAll(simulateCandidates(executorService, candidates).stream()
+                    .filter(score -> minimumInitialPopulationScore == null || score.getKey().compareTo(minimumInitialPopulationScore) > 0)
+                    .collect(Collectors.toList()));
+        } while (results.size() < initialPopulation);
         int topScoreUnchangedGenerations = 0;
         S topScore = null;
         while (topScoreUnchangedGenerations < stableGenerationsLimit) {
@@ -175,9 +182,9 @@ public class Engine<G, S extends Comparable> {
 
     }
 
-    private Set<GeneMap> initialPopulation(Map<String, GeneSpec> geneSpecs) {
+    private Set<GeneMap> createInitialPopulation(Map<String, GeneSpec> geneSpecs, int numberOfCandidates) {
         HashSet<GeneMap> ret = new HashSet<>();
-        for (int i = 0; i < initialPopulation; i++) {
+        for (int i = 0; i < numberOfCandidates; i++) {
             GeneMap geneMap = new GeneMap();
             geneSpecs.entrySet().forEach(e -> geneMap.genes.put(e.getKey(), e.getValue().randomValue()));
             ret.add(geneMap);

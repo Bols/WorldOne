@@ -52,7 +52,7 @@ public class TestGeneEngine
             if (oneleg.getFoodProximityOutput() < genes.stopDistance) {
                 oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf() * genes.speedEnum.speedFactor);
             } else {
-                oneleg.motorOutput(genes.stopSpeed / 2);
+                oneleg.motorOutput(genes.stopSpeed / 4);
             }
         }
 

@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static no.bols.w1.WorldScoreWithTrainingHistory.nullScore;
+
 
 public class World1SimulatorRunner<G> {
     private int scenarioTimeMs;
@@ -60,6 +62,8 @@ public class World1SimulatorRunner<G> {
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
                 .otherScoresReceiver(this::otherScore)
+                .minimumInitialPopulationScore(nullScore())
+                // .parallellism(1)
                 .build()
                 .runGeneticAlgorithmUntilStable();
         visualizeScore(bestScore);

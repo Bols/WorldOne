@@ -22,11 +22,16 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
         this.brain = brain;
     }
 
-    public void addScore(WorldScore newScore) {
+    public static WorldScoreWithTrainingHistory nullScore() {
+        return new WorldScoreWithTrainingHistory(null, null).addScore(new WorldScore(0, 0, 0));
+    }
+
+    public WorldScoreWithTrainingHistory addScore(WorldScore newScore) {
         history.add(newScore);
         if (bestScore == null || newScore.compareTo(bestScore) > 0) {
             bestScore = newScore;
         }
+        return this;
     }
 
     public boolean lastScoreWasImprovement() {
