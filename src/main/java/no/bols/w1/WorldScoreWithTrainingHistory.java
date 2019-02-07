@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithTrainingHistory> {
     private Time time;
     private Brain brain;
-    private WorldScore bestScore;
     private List<WorldScore> history = new ArrayList<>();
 
     public WorldScoreWithTrainingHistory(Time time, Brain brain) {
@@ -23,15 +22,16 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
     }
 
     public static WorldScoreWithTrainingHistory nullScore() {
-        return new WorldScoreWithTrainingHistory(null, null).addScore(new WorldScore(0, 0, 0));
+        return new WorldScoreWithTrainingHistory(null, null).addScore(new WorldScore(0, 3, 0));
     }
 
     public WorldScoreWithTrainingHistory addScore(WorldScore newScore) {
         history.add(newScore);
-        if (bestScore == null || newScore.compareTo(bestScore) > 0) {
-            bestScore = newScore;
-        }
         return this;
+    }
+
+    public WorldScore score() {
+        return history.get(history.size() - 1);
     }
 
     public boolean lastScoreWasImprovement() {
@@ -40,13 +40,13 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
 
     @Override
     public int compareTo(WorldScoreWithTrainingHistory o) {
-        return bestScore.compareTo(o.getBestScore());
+        return score().compareTo(o.score());
     }
 
     @Override
     public String toString() {
-        String score = f(bestScore.getScore()) + " dist:" + f(bestScore.getDistanceTraveled()) + " food:" + bestScore.getFoodEaten();
-        String historyString = history.size() < 2 ? "" : "[" + history.stream().map(h -> f(h.getScore())).collect(Collectors.joining(",")) + "]";
+        String score = f(score().getScoreValue()) + " dist:" + f(score().getDistanceTraveled()) + " food:" + score().getFoodEaten();
+        String historyString = history.size() < 2 ? "" : "[" + history.stream().map(h -> f(h.getScoreValue())).collect(Collectors.joining(",")) + "]";
         return score + historyString;
     }
 

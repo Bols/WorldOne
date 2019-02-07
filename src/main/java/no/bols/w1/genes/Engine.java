@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Builder
@@ -22,7 +23,7 @@ public class Engine<G, S extends Comparable> {
     private G gene;
     @Builder.Default
     private int initialPopulation = 64;
-    private S minimumInitialPopulationScore;
+    private Predicate<? super Pair<S, GeneMap>> filterInitialPopulation;
     @Builder.Default
     private int stableGenerationsLimit = 20;
     @Builder.Default
@@ -47,7 +48,7 @@ public class Engine<G, S extends Comparable> {
         do {
             Set<GeneMap> candidates = createInitialPopulation(geneSpec, parallellism);
             results.addAll(simulateCandidates(executorService, candidates).stream()
-                    .filter(score -> minimumInitialPopulationScore == null || score.getKey().compareTo(minimumInitialPopulationScore) > 0)
+                    .filter(filterInitialPopulation)
                     .collect(Collectors.toList()));
         } while (results.size() < initialPopulation);
         int topScoreUnchangedGenerations = 0;
@@ -78,7 +79,7 @@ public class Engine<G, S extends Comparable> {
                 topScore = results.first().getKey();
                 topScoreUnchangedGenerations = 0;
                 GeneMap topGene = results.first().getValue();
-                System.out.println("\nNew best score " + topScore + " - " + results.first().getValue().toString());
+                System.out.println("\nNew best scoreValue " + topScore + " - " + results.first().getValue().toString());
                 if (bestScoreReceiver != null) {
                     bestScoreReceiver.accept(new Pair(topScore, mapToGene(topGene)));
                 }
@@ -95,7 +96,7 @@ public class Engine<G, S extends Comparable> {
 
         }
         System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
-                "#Generations:" + generations + "  Best score " + results.first().getKey() + " - " + results.first().getValue());
+                "#Generations:" + generations + "  Best scoreValue " + results.first().getKey() + " - " + results.first().getValue());
         List<Pair<S, G>> ret = results.stream()
                 .map(r -> new Pair<S, G>(r.getKey(), mapToGene(r.getValue())))
                 .collect(Collectors.toList());
@@ -176,7 +177,7 @@ public class Engine<G, S extends Comparable> {
         @Override
         public Pair<S, GeneMap> call() {
             S score = evalFunction.apply(mapToGene(genes));
-            //System.out.println(score.toString() + " " + genes.toString());
+            //System.out.println(scoreValue.toString() + " " + genes.toString());
             return new Pair<>(score, genes);
         }
 

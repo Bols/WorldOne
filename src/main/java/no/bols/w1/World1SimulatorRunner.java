@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static no.bols.w1.WorldScoreWithTrainingHistory.nullScore;
-
 
 public class World1SimulatorRunner<G> {
     private int scenarioTimeMs;
@@ -62,7 +60,7 @@ public class World1SimulatorRunner<G> {
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
                 .otherScoresReceiver(this::otherScore)
-                .minimumInitialPopulationScore(nullScore())
+                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .1)
                 // .parallellism(1)
                 .build()
                 .runGeneticAlgorithmUntilStable();
@@ -78,10 +76,10 @@ public class World1SimulatorRunner<G> {
 
 
     private void newBestScore(Pair<WorldScoreWithTrainingHistory, G> newTopScore) {
-        bestScoreHistory.add(new Pair((System.currentTimeMillis() - realStartTime), newTopScore.getKey().getBestScore().getScore()));
+        bestScoreHistory.add(new Pair((System.currentTimeMillis() - realStartTime), newTopScore.getKey().score().getScoreValue()));
         this.bestScore = newTopScore;
 
-        // System.out.println("\nNew best score " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
+        // System.out.println("\nNew best scoreValue " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
     }
 
     public void visualizeScore(Pair<WorldScoreWithTrainingHistory, G> score) {
@@ -113,7 +111,7 @@ public class World1SimulatorRunner<G> {
         } while (scoreList.lastScoreWasImprovement());
 
         for (Pair<Long, Double> longDoublePair : bestScoreHistory) {
-            jfxVisualize.addDataPoint("Gene tuning best score", 0, longDoublePair.getKey(), longDoublePair.getValue());
+            jfxVisualize.addDataPoint("Gene tuning best scoreValue", 0, longDoublePair.getKey(), longDoublePair.getValue());
         }
         Platform.runLater(() -> {
             Stage stage = new Stage();

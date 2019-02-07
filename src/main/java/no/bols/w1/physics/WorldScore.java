@@ -7,12 +7,12 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class WorldScore implements Comparable<WorldScore> {
-    private double score;
+    private double scoreValue;
     private double distanceTraveled;
     private double foodEaten;
 
     @Override
     public int compareTo(WorldScore o) {
-        return Double.compare(score, o != null ? o.score : 0);
+        return Double.compare(scoreValue, o != null ? o.scoreValue : 0);
     }
 }
