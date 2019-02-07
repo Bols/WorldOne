@@ -42,15 +42,20 @@ public class Engine<G, S extends Comparable> {
         double effectiveMutationchance = this.mutationChance / geneSpec.size();
 
         long startTime = System.currentTimeMillis();
-        int generations = 0;
+        int numGenerations = 0;
         ExecutorService executorService = Executors.newWorkStealingPool(parallellism);
         SortedSet<Pair<S, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
-        do {
-            Set<GeneMap> candidates = createInitialPopulation(geneSpec, parallellism);
-            results.addAll(simulateCandidates(executorService, candidates).stream()
-                    .filter(filterInitialPopulation)
-                    .collect(Collectors.toList()));
-        } while (results.size() < initialPopulation);
+        findInitialCandidates(geneSpec, executorService, results);
+        numGenerations = runGenerations(effectiveMutationchance, numGenerations, executorService, results);
+        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
+                "#Generations:" + numGenerations + "  Best scoreValue " + results.first().getKey() + " - " + results.first().getValue());
+        List<Pair<S, G>> ret = results.stream()
+                .map(r -> new Pair<S, G>(r.getKey(), mapToGene(r.getValue())))
+                .collect(Collectors.toList());
+        return ret;
+    }
+
+    private int runGenerations(double effectiveMutationchance, int generations, ExecutorService executorService, SortedSet<Pair<S, GeneMap>> results) {
         int topScoreUnchangedGenerations = 0;
         S topScore = null;
         while (topScoreUnchangedGenerations < stableGenerationsLimit) {
@@ -94,13 +99,25 @@ public class Engine<G, S extends Comparable> {
                 }
             }
 
-        }
-        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
-                "#Generations:" + generations + "  Best scoreValue " + results.first().getKey() + " - " + results.first().getValue());
-        List<Pair<S, G>> ret = results.stream()
-                .map(r -> new Pair<S, G>(r.getKey(), mapToGene(r.getValue())))
-                .collect(Collectors.toList());
-        return ret;
+        } return generations;
+    }
+
+    private void findInitialCandidates(Map<String, GeneSpec> geneSpec, ExecutorService executorService, SortedSet<Pair<S, GeneMap>> results) {
+        int numCandidateTrials = 0;
+        long lastReport = System.currentTimeMillis() / 1000;
+        do {
+            Set<GeneMap> candidates = createInitialPopulation(geneSpec, parallellism);
+            results.addAll(simulateCandidates(executorService, candidates).stream()
+                    .filter(p -> filterInitialPopulation == null || filterInitialPopulation.test(p))
+                    .collect(Collectors.toList()));
+            numCandidateTrials = numCandidateTrials + candidates.size();
+            if (System.currentTimeMillis() / 1000 > lastReport) {
+                lastReport = System.currentTimeMillis() / 1000;
+                System.out.println("Finding candidates, [" + results.size() + "/" + initialPopulation + "], " + numCandidateTrials + " attempts.");
+            }
+        } while (results.size() < initialPopulation);
+        System.out.println("Found candidates, [" + results.size() + "/" + initialPopulation + "], " + numCandidateTrials + " attempts.");
+
     }
 
     private Map<String, GeneSpec> mapToGeneSpec(G gene) {

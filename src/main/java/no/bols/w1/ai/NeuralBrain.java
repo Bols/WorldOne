@@ -26,7 +26,7 @@ public class NeuralBrain extends Brain {
     @Getter
     final BrainGene genes;
     private final Neuron foodDistanceInput;
-    //private final Neuron foodSensorInput;
+    private final Neuron foodSensorInput;
     private final Neuron motorOutput;
     private final NeuronSpace neuronSpace;
 
@@ -36,15 +36,15 @@ public class NeuralBrain extends Brain {
         this.genes = genes;
         neuronSpace = new NeuronSpace(time, genes);
         foodDistanceInput = new Neuron(time, genes);
-        //foodSensorInput = new Neuron(time, genes);
+        foodSensorInput = new Neuron(time, genes);
         motorOutput = new Neuron(time, genes);
         neuronSpace.add(foodDistanceInput);
-        //neuronSpace.add(foodSensorInput);
+        neuronSpace.add(foodSensorInput);
         neuronSpace.add(motorOutput);
         neuronSpace.connectAll();
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
-        //foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.getEatingOutput());     // Kan erstattes med events ( istedet for recurring time event?)
+        foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.getEatingOutput());     // Kan erstattes med events ( istedet for recurring time event?)
         //neuronSpace.addProportionalDopamineTimeEvent(()->oneleg.getEatingOutput());
 
 
