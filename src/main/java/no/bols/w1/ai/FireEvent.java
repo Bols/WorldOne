@@ -3,6 +3,7 @@ package no.bols.w1.ai;//
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import no.bols.w1.ai.neuron.Neuron;
 import no.bols.w1.physics.Time;
 
 @Data

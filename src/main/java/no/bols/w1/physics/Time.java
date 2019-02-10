@@ -47,7 +47,7 @@ public class Time {
             for (int i = 0; i <= 1000; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.remove();
                 timeMilliSeconds = firstEvent.timeOffsetMilliSeconds;
-                firstEvent.eventHandler.accept(this);
+                firstEvent.eventHandler.accept(this);     //TODO: eventhandler bør også inneholde en metode for å oppdatere tilstand til siste
                 firstEvent.afterEvent(this);
                 eventsHandled++;
             }

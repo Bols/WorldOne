@@ -2,6 +2,9 @@ package no.bols.w1.ai;//
 //
 
 import lombok.Getter;
+import no.bols.w1.ai.neuron.LinearSTDPSynapseTrait;
+import no.bols.w1.ai.neuron.Neuron;
+import no.bols.w1.ai.neuron.SimpleLeakyIntegratorTrait;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 
@@ -34,13 +37,10 @@ public class NeuralBrain extends Brain {
     public NeuralBrain(Time time, BrainGene genes) {
         super(time);
         this.genes = genes;
-        neuronSpace = new NeuronSpace(time, genes);
-        foodDistanceInput = new Neuron(time, genes);
-        foodSensorInput = new Neuron(time, genes);
-        motorOutput = new Neuron(time, genes);
-        neuronSpace.add(foodDistanceInput);
-        neuronSpace.add(foodSensorInput);
-        neuronSpace.add(motorOutput);
+        neuronSpace = new NeuronSpace(time, genes, LinearSTDPSynapseTrait.class, SimpleLeakyIntegratorTrait.class);
+        foodDistanceInput = neuronSpace.createNeuron();
+        foodSensorInput = neuronSpace.createNeuron();
+        motorOutput = neuronSpace.createNeuron();
         neuronSpace.connectAll();
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
