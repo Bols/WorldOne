@@ -1,8 +1,7 @@
-package no.bols.w1.ai;//
+package no.bols.w1.ai.neuron;//
 //
 
 import lombok.Data;
-import no.bols.w1.ai.neuron.Neuron;
 
 @Data
 public class SynapticConnection {

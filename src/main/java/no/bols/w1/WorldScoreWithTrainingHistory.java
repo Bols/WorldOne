@@ -35,7 +35,12 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
     }
 
     public boolean lastScoreWasImprovement() {
-        return history.size() < 2 || history.get(history.size() - 1).compareTo(history.get(history.size() - 2)) > 0;
+        if (history.size() < 2) {
+            return true;
+        }
+        double previousScore = history.get(history.size() - 2).getScoreValue();
+        double thisScore = history.get(history.size() - 1).getScoreValue();
+        return thisScore > previousScore * 1.01;             //At least 1% improvement
     }
 
     @Override

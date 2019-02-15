@@ -2,7 +2,6 @@ package no.bols.w1.ai.neuron;//
 //
 
 import no.bols.w1.ai.FireEvent;
-import no.bols.w1.ai.SynapticConnection;
 import no.bols.w1.physics.Time;
 
 public abstract class NeuronTrait {

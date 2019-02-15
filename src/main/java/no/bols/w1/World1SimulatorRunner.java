@@ -64,7 +64,6 @@ public class World1SimulatorRunner<G> {
                 // .parallellism(1)
                 .build()
                 .runGeneticAlgorithmUntilStable();
-        visualizeScore(bestScore);
         return bestScore;
     }
 
@@ -82,7 +81,7 @@ public class World1SimulatorRunner<G> {
         // System.out.println("\nNew best scoreValue " + newTopScore.getKey() + " - " + newTopScore.getValue().toString());
     }
 
-    public void visualizeScore(Pair<WorldScoreWithTrainingHistory, G> score) {
+    public WorldScoreWithTrainingHistory rerunAndVisualize(Pair<WorldScoreWithTrainingHistory, G> score) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         new JFXPanel();
         jfxVisualize = new JfxVisualize();
@@ -129,6 +128,7 @@ public class World1SimulatorRunner<G> {
         System.out.println("Real-clock runtime:  " + time.getRealClockRuntime());
         System.out.println("Events handled: " + time.getEventsHandled());
         System.out.println("Neurons fired: " + time.getNeuronFireCountStat());
+        return scoreList;
     }
 
 }
