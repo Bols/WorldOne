@@ -26,19 +26,6 @@ public class NeuronSpace {
         return n;
     }
 
-    public void connectAll() {
-        for (Neuron neuron : neurons) {
-            for (Neuron source : neurons) {
-                if (neuron != source) {
-                    neuron.addIncomingSynapticConnection(source);
-                }
-
-            }
-
-        }
-
-    }
-
 
    /* public void addProportionalDopamineTimeEvent(Supplier<Double> input) {
         time.scheduleRecurringEvent(

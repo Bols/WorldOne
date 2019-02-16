@@ -2,6 +2,7 @@ package no.bols.w1.ai;//
 //
 
 import lombok.Getter;
+import no.bols.w1.ai.neuron.InhibitoryNeuronTrait;
 import no.bols.w1.ai.neuron.Neuron;
 import no.bols.w1.ai.neuron.STDPSynapseTrait;
 import no.bols.w1.ai.neuron.SimpleLeakyIntegratorTrait;
@@ -40,7 +41,16 @@ public class NeuralBrain extends Brain {
         foodDistanceInput = neuronSpace.createNeuron();
         foodSensorInput = neuronSpace.createNeuron();
         motorOutput = neuronSpace.createNeuron();
-        neuronSpace.connectAll();
+        Neuron hiddenExhibitoryNeuron = neuronSpace.createNeuron();
+        Neuron hiddenInhibitoryNeuron = neuronSpace.createNeuron().addTrait(InhibitoryNeuronTrait.class);
+
+        foodDistanceInput.addOutgoingSynapticConnection(hiddenExhibitoryNeuron);
+        foodSensorInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
+        hiddenExhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
+        hiddenInhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
+
+
+        
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
         foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.getEatingOutput());     // Kan erstattes med events ( istedet for recurring time event?)

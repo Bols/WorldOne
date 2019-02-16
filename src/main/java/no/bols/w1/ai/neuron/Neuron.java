@@ -25,19 +25,26 @@ public class Neuron {
     private Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
     private Set<SynapticConnection> outgoingPreSynapticConnections = new HashSet<>();
     private List<NeuronTrait> neuronTraits = new ArrayList<>();
+    private double initialSynapseWeight;
 
     public Neuron(Time time, BrainGene genes, Class<? extends NeuronTrait>[] traits) {
         this.time = time;
         this.genes = genes;
+        this.initialSynapseWeight = genes.getInitialSynapseWeight();
         for (Class<? extends NeuronTrait> trait : traits) {
-            try {
-                neuronTraits.add(trait.getConstructor(Neuron.class).newInstance(this));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            addTrait(trait);
         }
 
 
+    }
+
+    public Neuron addTrait(Class<? extends NeuronTrait> trait) {
+        try {
+            neuronTraits.add(trait.getConstructor(Neuron.class).newInstance(this));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return this;
     }
 
     void updateVoltagePotential(double value) {
@@ -88,11 +95,21 @@ public class Neuron {
         time.scheduleRecurringEvent(t -> this.updateVoltagePotential(input.get()), 10);
     }
 
-    public void addIncomingSynapticConnection(Neuron source) {
-        incomingPostSynapticConnections.add(new SynapticConnection(this, source));
-    }
-
-    void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
+    public void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
         outgoingPreSynapticConnections.add(synapticConnection);
     }
+
+    public double getInitialSynapseWeight() {
+        return initialSynapseWeight;
+    }
+
+    public void setInitialSynapseWeight(double initialSynapseWeight) {
+        this.initialSynapseWeight = initialSynapseWeight;
+    }
+
+    public void addOutgoingSynapticConnection(Neuron target) {
+        target.incomingPostSynapticConnections.add(new SynapticConnection(target, this));
+    }
+
+
 }

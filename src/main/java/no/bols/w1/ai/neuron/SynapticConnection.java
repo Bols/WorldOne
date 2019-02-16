@@ -9,16 +9,17 @@ import static no.bols.w1.ai.neuron.NeuronUtil.normalizeValue;
 public class SynapticConnection {
     private Neuron source;
     private Neuron target;
-    private double weight = .5;
+    private double weight;
 
     public SynapticConnection(Neuron target, Neuron source) {
         this.source = source;
         source.addOutgoingSynapticConnection(this);
         this.target = target;
+        this.weight = source.getInitialSynapseWeight();
     }
 
     public void changeWeight(double factor) {
-        weight = normalizeValue(weight + weight * factor);
+        weight = normalizeValue(weight + weight * factor * source.getGenes().getStdpModificationSpeed());
 
     }
 

@@ -21,8 +21,8 @@ public class BrainGene {
 
     //Synapses
 
-    @DoubleGene(min = .0, max = 1.0)
-    public double stdpFactor = .2;
+    @DoubleGene(min = .0, max = 0.5)
+    public double stdpModificationSpeed = .2;
 
     @DoubleGene(min = 10, max = 30.0)
     public double stdpPreHalfTime = 20;
@@ -30,4 +30,7 @@ public class BrainGene {
     @DoubleGene(min = 5, max = 20.0)
     public double stdpPostHalfTime = 10;
 
+
+    @DoubleGene(min = .1, max = 1.0)
+    public double initialSynapseWeight = .5;
 }
