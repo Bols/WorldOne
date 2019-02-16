@@ -40,7 +40,7 @@ public class Neuron {
 
     }
 
-    public void updateVoltagePotential(double value) {
+    void updateVoltagePotential(double value) {
         updateStateToNow();
         for (NeuronTrait neuronTrait : neuronTraits) {
             neuronTrait.updateVoltagePotential(value);
@@ -52,6 +52,7 @@ public class Neuron {
         FireEvent fireEvent = new FireEvent(time.getSimulatedTime(), this);
         time.addNeuronFireCountStat();
         for (SynapticConnection outgoingPreSynapticConnection : outgoingPreSynapticConnections) {
+            outgoingPreSynapticConnection.fire();
             for (NeuronTrait neuronTrait : neuronTraits) {
                 neuronTrait.onPreSynapticSourceFired(fireEvent, outgoingPreSynapticConnection);
             }
@@ -84,16 +85,14 @@ public class Neuron {
     }
 
     public void addProportionalInputTimeEvent(Supplier<Double> input) {
-        time.scheduleRecurringEvent(t -> {
-            this.updateVoltagePotential(input.get());
-        }, 10);
+        time.scheduleRecurringEvent(t -> this.updateVoltagePotential(input.get()), 10);
     }
 
     public void addIncomingSynapticConnection(Neuron source) {
         incomingPostSynapticConnections.add(new SynapticConnection(this, source));
     }
 
-    public void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
+    void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
         outgoingPreSynapticConnections.add(synapticConnection);
     }
 }

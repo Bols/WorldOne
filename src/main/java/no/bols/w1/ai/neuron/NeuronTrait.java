@@ -30,8 +30,5 @@ public abstract class NeuronTrait {
     public void updateVoltagePotential(double value) {
     }
 
-    protected double normalizeValue(double value) {
-        return Math.min(1.0, Math.max(value, 0.0));
-    }
 
 }

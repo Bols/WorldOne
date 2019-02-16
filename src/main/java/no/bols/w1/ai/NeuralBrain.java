@@ -2,8 +2,8 @@ package no.bols.w1.ai;//
 //
 
 import lombok.Getter;
-import no.bols.w1.ai.neuron.LinearSTDPSynapseTrait;
 import no.bols.w1.ai.neuron.Neuron;
+import no.bols.w1.ai.neuron.STDPSynapseTrait;
 import no.bols.w1.ai.neuron.SimpleLeakyIntegratorTrait;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
@@ -19,7 +19,6 @@ import no.bols.w1.physics.Time;
  * <li>stdp</li>
  * <li>dopamin - eksternt styrt? Fra neuronene selv? </li>
  * <li>programmert thalamus som innfører positiv feedback ved måloppnåelse</li>
- * <li>innføre nye neuroner - random?</li>
  * <li>gro nye synapser  - random?</li>
  * <li>utmatting av neuroner for å begrense aktivitet?</li>
  * <li>Innføre regioner med ulike regler for feedback-synapser og andre regler. Columns? </li>
@@ -37,7 +36,7 @@ public class NeuralBrain extends Brain {
     public NeuralBrain(Time time, BrainGene genes) {
         super(time);
         this.genes = genes;
-        neuronSpace = new NeuronSpace(time, genes, LinearSTDPSynapseTrait.class, SimpleLeakyIntegratorTrait.class);
+        neuronSpace = new NeuronSpace(time, genes, STDPSynapseTrait.class, SimpleLeakyIntegratorTrait.class);
         foodDistanceInput = neuronSpace.createNeuron();
         foodSensorInput = neuronSpace.createNeuron();
         motorOutput = neuronSpace.createNeuron();
@@ -52,3 +51,15 @@ public class NeuralBrain extends Brain {
 
 
 }
+
+/*
+Dendritene er i seg selv ikke-lineære (tre eller flere signaler inn gir mer enn 3x effekten på nevronet)
+
+
+Vekst:               https://www.ncbi.nlm.nih.gov/books/NBK234146/
+Nevronal celledeling (symmetrisk og assymetrisk)
+Retning på axoner - mesteparten nedover i cortex
+
+
+
+ */

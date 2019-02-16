@@ -24,11 +24,10 @@ public class BrainGene {
     @DoubleGene(min = .0, max = 1.0)
     public double stdpFactor = .2;
 
-    @DoubleGene(min = .0, max = 200.0)
-    public double stdpPreTime = 130;
+    @DoubleGene(min = 10, max = 30.0)
+    public double stdpPreHalfTime = 20;
 
-    @DoubleGene(min = .0, max = 100.0)
-    public double stdpPostTime = 60;
-
+    @DoubleGene(min = 5, max = 20.0)
+    public double stdpPostHalfTime = 10;
 
 }

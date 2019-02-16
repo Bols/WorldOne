@@ -4,6 +4,8 @@ package no.bols.w1.ai.neuron;//
 import no.bols.w1.ai.BrainGene;
 import no.bols.w1.physics.Time;
 
+import static no.bols.w1.ai.neuron.NeuronUtil.normalizeValue;
+
 public class SimpleLeakyIntegratorTrait extends NeuronTrait {
     public SimpleLeakyIntegratorTrait(Neuron neuron) {
         super(neuron);
