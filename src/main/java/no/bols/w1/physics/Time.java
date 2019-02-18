@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Time {
+    public static int BATCH_SIZE = 1000;
     private long timeMilliSeconds;
     private long iteration = 0;
     private PriorityQueue<Event> scheduledEvents;
@@ -44,7 +45,7 @@ public class Time {
             throw new RuntimeException("No scheduled events. Simulation not initialized");
         }
         while (!stopCriteria.test(this) && !timeOut) {
-            for (int i = 0; i <= 1000; i++) {  //replace with thread
+            for (int i = 0; i < BATCH_SIZE; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.remove();
                 timeMilliSeconds = firstEvent.timeOffsetMilliSeconds;
                 firstEvent.eventHandler.accept(this);     //TODO: eventhandler bør også inneholde en metode for å oppdatere tilstand til siste
@@ -60,6 +61,12 @@ public class Time {
         realClockRuntime = System.currentTimeMillis() - startClockTime;
 
         //System.out.print("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMilliSeconds / 1000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
+    }
+
+
+    public void runSingleEvent(Consumer<Time> eventHandler, long timeOffsetMilliseconds) {
+        this.scheduleEvent(eventHandler, timeOffsetMilliseconds);
+        this.runUntil(allEventsDone());
     }
 
     public void reset() {
@@ -87,7 +94,6 @@ public class Time {
     public long timeSince(Instant startTime) {
         return getSimulatedTime().timeSince(startTime);
     }
-
 
     @AllArgsConstructor
     private static class Event implements Comparable<Event> {
@@ -144,5 +150,11 @@ public class Time {
             // If in different iterations, use start time instead, as comparedTime is meaningless
             return timeMs;
         }
+    }
+
+    public final static Instant zero = new Instant(0, 0);
+
+    public Predicate<Time> allEventsDone() {
+        return (time -> this.scheduledEvents.isEmpty());
     }
 }

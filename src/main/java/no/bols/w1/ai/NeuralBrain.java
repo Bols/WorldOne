@@ -2,7 +2,6 @@ package no.bols.w1.ai;//
 //
 
 import lombok.Getter;
-import no.bols.w1.ai.neuron.InhibitoryNeuronTrait;
 import no.bols.w1.ai.neuron.Neuron;
 import no.bols.w1.ai.neuron.STDPSynapseTrait;
 import no.bols.w1.ai.neuron.SimpleLeakyIntegratorTrait;
@@ -42,13 +41,14 @@ public class NeuralBrain extends Brain {
         foodSensorInput = neuronSpace.createNeuron();
         motorOutput = neuronSpace.createNeuron();
         Neuron hiddenExhibitoryNeuron = neuronSpace.createNeuron();
-        Neuron hiddenInhibitoryNeuron = neuronSpace.createNeuron().addTrait(InhibitoryNeuronTrait.class);
+        Neuron hiddenInhibitoryNeuron = neuronSpace.createInhibitoryNeuron();
 
         foodDistanceInput.addOutgoingSynapticConnection(hiddenExhibitoryNeuron);
         foodSensorInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
         hiddenExhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
         hiddenInhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
 
+        foodSensorInput.addProportionalOutputTimeEvent(o -> neuronSpace.dopamineLevel(o));
 
         
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
@@ -63,7 +63,7 @@ public class NeuralBrain extends Brain {
 }
 
 /*
-Dendritene er i seg selv ikke-lineære (tre eller flere signaler inn gir mer enn 3x effekten på nevronet)
+Dendritiske trær er i seg selv ikke-lineære (tre eller flere signaler inn gir mer enn 3x effekten på nevronet)
 
 
 Vekst:               https://www.ncbi.nlm.nih.gov/books/NBK234146/

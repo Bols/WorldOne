@@ -3,6 +3,7 @@ package no.bols.w1.ai.neuron;//
 
 import no.bols.w1.ai.FireEvent;
 import no.bols.w1.physics.Time;
+import no.bols.w1.physics.TimeValue;
 
 public abstract class NeuronTrait {
 
@@ -31,4 +32,8 @@ public abstract class NeuronTrait {
     }
 
 
+    public void onDifferentialDopamineLevel(TimeValue dopamineLevel, SynapticConnection incomingConnection, TimeValue previousDopamineLevel) {
+    }
+
+    ;
 }

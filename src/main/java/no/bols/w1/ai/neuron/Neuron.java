@@ -5,6 +5,7 @@ import lombok.Getter;
 import no.bols.w1.ai.BrainGene;
 import no.bols.w1.ai.FireEvent;
 import no.bols.w1.physics.Time;
+import no.bols.w1.physics.TimeValue;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -25,17 +26,16 @@ public class Neuron {
     private Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
     private Set<SynapticConnection> outgoingPreSynapticConnections = new HashSet<>();
     private List<NeuronTrait> neuronTraits = new ArrayList<>();
-    private double initialSynapseWeight;
+    @Getter
+    protected double initialSynapseWeight;
 
     public Neuron(Time time, BrainGene genes, Class<? extends NeuronTrait>[] traits) {
         this.time = time;
         this.genes = genes;
-        this.initialSynapseWeight = genes.getInitialSynapseWeight();
         for (Class<? extends NeuronTrait> trait : traits) {
             addTrait(trait);
         }
-
-
+        initialSynapseWeight = genes.getInitialSynapseWeight();
     }
 
     public Neuron addTrait(Class<? extends NeuronTrait> trait) {
@@ -95,21 +95,28 @@ public class Neuron {
         time.scheduleRecurringEvent(t -> this.updateVoltagePotential(input.get()), 10);
     }
 
-    public void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
+    void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {
         outgoingPreSynapticConnections.add(synapticConnection);
     }
 
-    public double getInitialSynapseWeight() {
-        return initialSynapseWeight;
+
+    public boolean isExcitatory() {
+        return getInitialSynapseWeight() > 0;
     }
 
-    public void setInitialSynapseWeight(double initialSynapseWeight) {
-        this.initialSynapseWeight = initialSynapseWeight;
-    }
 
     public void addOutgoingSynapticConnection(Neuron target) {
         target.incomingPostSynapticConnections.add(new SynapticConnection(target, this));
     }
 
 
+    public void differentialDopamineLevel(TimeValue dopamineLevel, TimeValue previousDopamineLevel) {
+        for (SynapticConnection incomingPostSynapticConnection : incomingPostSynapticConnections) {    //Really must be faster
+            for (NeuronTrait neuronTrait : neuronTraits) {
+                neuronTrait.onDifferentialDopamineLevel(dopamineLevel, incomingPostSynapticConnection, previousDopamineLevel);
+            }
+
+        }
+
+    }
 }
