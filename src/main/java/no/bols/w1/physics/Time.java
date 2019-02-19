@@ -142,7 +142,7 @@ public class Time {
 
         public long timeSince(Instant comparedTime) {
             if (comparedTime == null) {
-                return timeMs;
+                return 10000; //
             }
             if (comparedTime.iteration == iteration) {
                 return timeMs - comparedTime.timeMs;

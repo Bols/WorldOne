@@ -23,7 +23,7 @@ public class Neuron {
     BrainGene genes;
     @Getter
     Time.Instant lastUpdateState;
-    private Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
+    Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
     private Set<SynapticConnection> outgoingPreSynapticConnections = new HashSet<>();
     private List<NeuronTrait> neuronTraits = new ArrayList<>();
     @Getter
@@ -73,6 +73,7 @@ public class Neuron {
         for (NeuronTrait trait : neuronTraits) {
             trait.onFire(fireEvent);
         }
+        lastFireTime = fireEvent.getTime();
     }
 
 
