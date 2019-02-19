@@ -14,6 +14,7 @@ public class SynapticConnection {
     private double weight;
     private TimeValue lastWeightChange = TimeValue.none;
     private TimeValue lastBoost = TimeValue.none;
+    private TimeValue lastWeightFactor;
 
     public SynapticConnection(Neuron target, Neuron source) {
         this.source = source;
@@ -36,4 +37,5 @@ public class SynapticConnection {
         weight = normalizeValue(weight + weight * boost);
         lastBoost = new TimeValue(time, boost);
     }
+
 }

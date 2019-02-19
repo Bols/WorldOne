@@ -25,10 +25,10 @@ public class BrainGene {
     public double stdpMobility = 0.05;
 
     @DoubleGene(min = 2, max = 20)
-    public double stdpDopamineMobilityBoost = 10;
+    public double stdpDopamineMobilityBoost = 3;
 
     @DoubleGene(min = 50, max = 3000)
-    public double stdpDopamineEligibilityTimeout;
+    public double stdpDopamineEligibilityTimeout = 2000;
 
     @DoubleGene(min = 10, max = 30.0)
     public double stdpPreHalfTime = 20;
