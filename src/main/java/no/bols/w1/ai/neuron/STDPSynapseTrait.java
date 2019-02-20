@@ -16,7 +16,7 @@ public class STDPSynapseTrait extends NeuronTrait {
         BrainGene genes = target.getGenes();
         long timeDiff = fireEvent.getTime().timeSince(target.getLastFireTime());
         if (timeDiff > 0 && timeDiff < genes.getStdpPreHalfTime() * 32) {
-            double factor = genes.getStdpPreHalfTime() / (genes.getStdpPreHalfTime() + timeDiff);
+            double factor = genes.getStdpPreHalfTime() / (genes.getStdpPreHalfTime() + timeDiff) * connection.getSource().exhibitorySign();
             connection.setLastWeightFactor(new TimeValue(fireEvent.getTime(), factor));
             connection.changeWeight(-factor * fireEvent.getSource().getGenes().getStdpMobility(), fireEvent.getTime());
         }
@@ -27,7 +27,7 @@ public class STDPSynapseTrait extends NeuronTrait {
         Neuron target = connection.getTarget();
         long timeDiff = fireEvent.getTime().timeSince(connection.getSource().getLastFireTime());
         if (timeDiff > 0) {
-            double factor = target.getGenes().getStdpPostHalfTime() / (target.getGenes().getStdpPostHalfTime() + timeDiff);
+            double factor = target.getGenes().getStdpPostHalfTime() / (target.getGenes().getStdpPostHalfTime() + timeDiff) * connection.getSource().exhibitorySign();
             connection.setLastWeightFactor(new TimeValue(fireEvent.getTime(), factor));
             connection.changeWeight(factor * fireEvent.getSource().getGenes().getStdpMobility(), fireEvent.getTime());
         }

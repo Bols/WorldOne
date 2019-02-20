@@ -7,6 +7,10 @@ import no.bols.w1.physics.Time;
 public class InhibitoryNeuron extends Neuron {
     public InhibitoryNeuron(Time time, BrainGene genes, Class<? extends NeuronTrait>[] traits) {
         super(time, genes, traits);
-        initialSynapseWeight = -genes.getInitialSynapseWeight();
+    }
+
+    @Override
+    public boolean isExcitatory() {
+        return false;
     }
 }

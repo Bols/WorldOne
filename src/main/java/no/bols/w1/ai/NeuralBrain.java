@@ -48,6 +48,7 @@ public class NeuralBrain extends Brain {
         hiddenExhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
         hiddenInhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
 
+
         foodSensorInput.addProportionalOutputTimeEvent(o -> neuronSpace.dopamineLevel(o));
 
         

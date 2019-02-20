@@ -26,8 +26,6 @@ public class Neuron {
     Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
     private Set<SynapticConnection> outgoingPreSynapticConnections = new HashSet<>();
     private List<NeuronTrait> neuronTraits = new ArrayList<>();
-    @Getter
-    protected double initialSynapseWeight;
 
     public Neuron(Time time, BrainGene genes, Class<? extends NeuronTrait>[] traits) {
         this.time = time;
@@ -35,7 +33,6 @@ public class Neuron {
         for (Class<? extends NeuronTrait> trait : traits) {
             addTrait(trait);
         }
-        initialSynapseWeight = genes.getInitialSynapseWeight();
     }
 
     public Neuron addTrait(Class<? extends NeuronTrait> trait) {
@@ -102,7 +99,7 @@ public class Neuron {
 
 
     public boolean isExcitatory() {
-        return getInitialSynapseWeight() > 0;
+        return true;
     }
 
 
@@ -119,5 +116,9 @@ public class Neuron {
 
         }
 
+    }
+
+    public double exhibitorySign() {
+        return this.isExcitatory() ? 1 : -1;
     }
 }

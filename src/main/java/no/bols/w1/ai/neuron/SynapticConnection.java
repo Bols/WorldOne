@@ -20,7 +20,7 @@ public class SynapticConnection {
         this.source = source;
         source.addOutgoingSynapticConnection(this);
         this.target = target;
-        this.weight = source.getInitialSynapseWeight();
+        this.weight = source.getGenes().getInitialSynapseWeight();
     }
 
     public void changeWeight(double factor, Time.Instant time) {
@@ -30,7 +30,7 @@ public class SynapticConnection {
     }
 
     public void fire() {
-        target.updateVoltagePotential(weight);
+        target.updateVoltagePotential(weight * source.exhibitorySign());
     }
 
     public void dopamineBoost(double boost, Time.Instant time) {
