@@ -61,6 +61,7 @@ public class JfxVisualize extends Application {
         scene.addEventHandler(KeyEvent.KEY_PRESSED, t -> {
             stage.close();
         });
+        scene.getStylesheets().add("w1stats.css");
         stage.setScene(scene);
         stage.show();
 
