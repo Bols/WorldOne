@@ -54,7 +54,7 @@ public class Neuron {
 
     void fire() {
         FireEvent fireEvent = new FireEvent(time.getSimulatedTime(), this);
-        time.addNeuronFireCountStat();
+        time.incrementStat(isExcitatory() ? "ex" : "in");
         for (SynapticConnection outgoingPreSynapticConnection : outgoingPreSynapticConnections) {
             outgoingPreSynapticConnection.fire();
             for (NeuronTrait neuronTrait : neuronTraits) {

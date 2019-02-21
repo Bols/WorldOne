@@ -4,9 +4,8 @@ package no.bols.w1.physics;//
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.PriorityQueue;
+import java.util.*;
+import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -21,7 +20,10 @@ public class Time {
     @Getter
     private long realClockRuntime;
 
-    private int neuronFireCountStat = 0;
+    private boolean gatherStats = false;
+
+    @Getter
+    private Map<String, DoubleAdder> stats = new HashMap<>();
 
     public Time() {
         reset();
@@ -75,17 +77,13 @@ public class Time {
         scheduledEvents = new PriorityQueue<>();
         eventsHandled = 0;
         recurringEventsList.forEach(scheduledEvents::add);
-        neuronFireCountStat = 0;
-
+        stats = new HashMap<>();
     }
 
     public void unScheduleRecurringEvent(RecurringEvent event) {
         recurringEventsList.remove(event);
     }
 
-    public int getNeuronFireCountStat() {
-        return neuronFireCountStat;
-    }
 
     public Instant getSimulatedTime() {
         return new Instant(iteration, timeMilliSeconds);
@@ -122,8 +120,11 @@ public class Time {
         }
     }
 
-    public void addNeuronFireCountStat() {
-        this.neuronFireCountStat++;
+    public void incrementStat(String type) {
+        if (gatherStats) {
+            DoubleAdder stat = stats.computeIfAbsent(type, k -> new DoubleAdder());
+            stat.add(1);
+        }
     }
 
 
@@ -150,6 +151,10 @@ public class Time {
             // If in different iterations, use start time instead, as comparedTime is meaningless
             return timeMs;
         }
+    }
+
+    public void gatherStats(boolean gather) {
+        this.gatherStats = gather;
     }
 
     public final static Instant zero = new Instant(0, 0);

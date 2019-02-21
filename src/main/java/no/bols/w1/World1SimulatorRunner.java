@@ -12,9 +12,12 @@ import no.bols.w1.physics.Time;
 import no.bols.w1.physics.World;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.stream.Collectors;
 
 
 public class World1SimulatorRunner<G> {
@@ -87,6 +90,7 @@ public class World1SimulatorRunner<G> {
         jfxVisualize = new JfxVisualize();
         Time time = score.getKey().getTime();
         time.reset();
+        time.gatherStats(true);
         Brain blankBrain = brainFactory.createBrain(time, score.getValue());
         WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
         Time.RecurringEvent graphEvent = null;
@@ -98,11 +102,17 @@ public class World1SimulatorRunner<G> {
             time.reset();
             Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, blankBrain);
-            AtomicInteger neuronFires = new AtomicInteger(0);
+            Map<String, Double> oldValues = new HashMap<>();
             graphEvent = time.scheduleRecurringEvent(t -> {
                 jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
-                jfxVisualize.addDataPoint("Fire", scoreList.getHistory().size(), t.getSimulatedTime().ms(), (simulationWorld.getTime().getNeuronFireCountStat() - neuronFires.get()));
-                neuronFires.set(simulationWorld.getTime().getNeuronFireCountStat());
+                for (Map.Entry<String, DoubleAdder> statEntry : time.getStats().entrySet()) {
+                    Double previousValue = oldValues.get(statEntry.getKey());
+                    double newValue = statEntry.getValue().doubleValue();
+                    jfxVisualize.addDataPoint(statEntry.getKey(), scoreList.getHistory().size(), t.getSimulatedTime().ms(), newValue - (previousValue != null ? previousValue : 0));
+                    oldValues.put(statEntry.getKey(), newValue);
+                }
+
+
             }, 100);
 
             time.runUntil(t -> t.timeSince(startTime) > scenarioTimeMs);
@@ -127,7 +137,7 @@ public class World1SimulatorRunner<G> {
         System.out.println(score.getKey());
         System.out.println("Real-clock runtime:  " + time.getRealClockRuntime());
         System.out.println("Events handled: " + time.getEventsHandled());
-        System.out.println("Neurons fired: " + time.getNeuronFireCountStat());
+        System.out.println("Stats: " + time.getStats().entrySet().stream().map(e -> e.getKey() + ":" + e.getValue().doubleValue()).collect(Collectors.joining(",")));
         return scoreList;
     }
 

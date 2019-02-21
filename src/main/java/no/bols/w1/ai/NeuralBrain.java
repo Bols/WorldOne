@@ -44,7 +44,7 @@ public class NeuralBrain extends Brain {
         Neuron hiddenInhibitoryNeuron = neuronSpace.createInhibitoryNeuron();
 
         foodDistanceInput.addOutgoingSynapticConnection(hiddenExhibitoryNeuron);
-        foodSensorInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
+        foodDistanceInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
         hiddenExhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
         hiddenInhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
 
