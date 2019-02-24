@@ -4,8 +4,6 @@ package no.bols.w1.ai.neuron;//
 import no.bols.w1.ai.BrainGene;
 import no.bols.w1.physics.Time;
 
-import static no.bols.w1.ai.neuron.NeuronUtil.normalizeValue;
-
 public class SimpleLeakyIntegratorTrait extends NeuronTrait {
     public SimpleLeakyIntegratorTrait(Neuron neuron) {
         super(neuron);
@@ -19,7 +17,7 @@ public class SimpleLeakyIntegratorTrait extends NeuronTrait {
 
     @Override
     public void updateVoltagePotential(double value) {
-        neuron.voltage_state += normalizeValue(value) * neuron.genes.getExhibitionFactor() * refractoryPeriodFactor();
+        neuron.voltage_state += value * neuron.genes.getExhibitionFactor() * refractoryPeriodFactor();
         BrainGene genes = neuron.getGenes();
         Time time = neuron.time;
         if (neuron.voltage_state > genes.getFireTreshold()) {

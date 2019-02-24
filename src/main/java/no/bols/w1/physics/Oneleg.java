@@ -49,7 +49,11 @@ public class Oneleg extends PhysObject {
     }
 
     private boolean canEat() {
-        return lastMotorOutput < .01 && distance(world.getCurrentFood()) < .1 && world.getCurrentFood().getFoodAmount() > 0;
+        return lastMotorOutput < .01 && isInEatingDistance();
+    }
+
+    public boolean isInEatingDistance() {
+        return distance(world.getCurrentFood()) < .1 && world.getCurrentFood().getFoodAmount() > 0;
     }
 
 

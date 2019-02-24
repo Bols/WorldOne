@@ -31,6 +31,7 @@ public class NeuralBrain extends Brain {
     private final Neuron foodSensorInput;
     private final Neuron motorOutput;
     private final NeuronSpace neuronSpace;
+    private final Neuron eatingSensorInput;
 
 
     public NeuralBrain(Time time, BrainGene genes) {
@@ -39,19 +40,20 @@ public class NeuralBrain extends Brain {
         neuronSpace = new NeuronSpace(time, genes, STDPSynapseTrait.class, SimpleLeakyIntegratorTrait.class);
         foodDistanceInput = neuronSpace.createNeuron();
         foodSensorInput = neuronSpace.createNeuron();
+        eatingSensorInput = neuronSpace.createNeuron();
         motorOutput = neuronSpace.createNeuron();
         Neuron hiddenExhibitoryNeuron = neuronSpace.createNeuron();
         Neuron hiddenInhibitoryNeuron = neuronSpace.createInhibitoryNeuron();
 
         foodDistanceInput.addOutgoingSynapticConnection(hiddenExhibitoryNeuron);
-        foodDistanceInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
+        foodSensorInput.addOutgoingSynapticConnection(hiddenInhibitoryNeuron);
         hiddenExhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
         hiddenInhibitoryNeuron.addOutgoingSynapticConnection(motorOutput);
 
 
-        foodSensorInput.addProportionalOutputTimeEvent(o -> neuronSpace.dopamineLevel(o));
+        eatingSensorInput.addProportionalOutputTimeEvent(o -> neuronSpace.dopamineLevel(o));
 
-        
+        foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.isInEatingDistance() ? 1 : 0.0);
         foodDistanceInput.addProportionalInputTimeEvent(() -> oneleg.getFoodProximityOutput());
         motorOutput.addProportionalOutputTimeEvent(o -> oneleg.motorOutput(o));
         foodSensorInput.addProportionalInputTimeEvent(() -> oneleg.getEatingOutput());     // Kan erstattes med events ( istedet for recurring time event?)

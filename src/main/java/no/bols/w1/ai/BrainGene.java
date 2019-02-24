@@ -10,7 +10,7 @@ public class BrainGene {
     @DoubleGene(min = .0, max = 1)
     public double exhibitionFactor = 0.5;
 
-    //@DoubleGene(min = .0, max = .2)
+    @DoubleGene(min = .0, max = .001)
     public double leakPerMs = 0.0;
 
     @DoubleGene(min = .5, max = 1.0)
