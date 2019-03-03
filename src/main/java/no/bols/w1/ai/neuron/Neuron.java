@@ -15,14 +15,12 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class Neuron {
-    double voltage_state = 0;
+
     @Getter
     Time.Instant lastFireTime;
     Time time;
     @Getter
     BrainGene genes;
-    @Getter
-    Time.Instant lastUpdateState;
     Set<SynapticConnection> incomingPostSynapticConnections = new HashSet<>();
     private Set<SynapticConnection> outgoingPreSynapticConnections = new HashSet<>();
     private List<NeuronTrait> neuronTraits = new ArrayList<>();
@@ -44,19 +42,20 @@ public class Neuron {
         return this;
     }
 
-    void updateVoltagePotential(double value) {
-        updateStateToNow();
+    void updateVoltagePotential(Time.Instant t, double value) {
+        updateStateToNow(t);
         for (NeuronTrait neuronTrait : neuronTraits) {
-            neuronTrait.updateVoltagePotential(value);
+            neuronTrait.updateVoltagePotential(t, value);
         }
     }
 
 
     void fire() {
-        FireEvent fireEvent = new FireEvent(time.getSimulatedTime(), this);
+        Time.Instant now = time.getSimulatedTime();
+        FireEvent fireEvent = new FireEvent(now, this);
         time.incrementStat(isExcitatory() ? "ex" : "in");
         for (SynapticConnection outgoingPreSynapticConnection : outgoingPreSynapticConnections) {
-            outgoingPreSynapticConnection.fire();
+            outgoingPreSynapticConnection.fire(now);
             for (NeuronTrait neuronTrait : neuronTraits) {
                 neuronTrait.onPreSynapticSourceFired(fireEvent, outgoingPreSynapticConnection);
             }
@@ -74,12 +73,10 @@ public class Neuron {
     }
 
 
-    private void updateStateToNow() {
+    private void updateStateToNow(Time.Instant t) {
         for (NeuronTrait trait : neuronTraits) {
-            trait.updateState(lastUpdateState);
+            trait.updateState(t);
         }
-        lastUpdateState = time.getSimulatedTime();
-
     }
 
     public void addProportionalOutputTimeEvent(Consumer<Double> output) {
@@ -90,7 +87,7 @@ public class Neuron {
     }
 
     public void addProportionalInputTimeEvent(Supplier<Double> input) {
-        time.scheduleRecurringEvent(t -> this.updateVoltagePotential(input.get()), 10);
+        time.scheduleRecurringEvent(t -> this.updateVoltagePotential(t.getSimulatedTime(), input.get()), 10);
     }
 
     void addOutgoingSynapticConnection(SynapticConnection synapticConnection) {

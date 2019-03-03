@@ -37,6 +37,6 @@ public class BrainGene {
     public double stdpPostHalfTime = 10;
 
 
-    @DoubleGene(min = .0, max = 0.2)
+    @DoubleGene(min = .0, max = 1.0)
     public double initialSynapseWeight = .1;
 }

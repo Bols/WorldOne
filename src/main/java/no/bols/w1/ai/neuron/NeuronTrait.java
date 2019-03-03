@@ -13,7 +13,7 @@ public abstract class NeuronTrait {
         this.neuron = neuron;
     }
 
-    public void updateState(Time.Instant lastUpdateState) {
+    public void updateState(Time.Instant now) {
     }
 
     public void onFire(FireEvent f) {
@@ -28,7 +28,7 @@ public abstract class NeuronTrait {
     }
 
 
-    public void updateVoltagePotential(double value) {
+    public void updateVoltagePotential(Time.Instant t, double value) {
     }
 
 

@@ -105,6 +105,7 @@ public class World1SimulatorRunner<G> {
             Map<String, Double> oldValues = new HashMap<>();
             graphEvent = time.scheduleRecurringEvent(t -> {
                 jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
+                jfxVisualize.addDataPoint("Motoroutput", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getLastMotorOutput());
                 for (Map.Entry<String, DoubleAdder> statEntry : time.getStats().entrySet()) {
                     Double previousValue = oldValues.get(statEntry.getKey());
                     double newValue = statEntry.getValue().doubleValue();

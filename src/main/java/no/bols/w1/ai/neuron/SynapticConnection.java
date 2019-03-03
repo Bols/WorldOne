@@ -29,8 +29,8 @@ public class SynapticConnection {
 
     }
 
-    public void fire() {
-        target.updateVoltagePotential(weight * source.exhibitorySign());
+    public void fire(Time.Instant now) {
+        target.updateVoltagePotential(now, weight * source.exhibitorySign());
     }
 
     public void dopamineBoost(double boost, Time.Instant time) {
