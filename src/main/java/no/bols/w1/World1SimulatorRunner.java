@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import javafx.util.Pair;
 import lombok.Builder;
 import no.bols.w1.genes.Engine;
+import no.bols.w1.genes.GeneticAlgorithm;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.JfxVisualize;
 import no.bols.w1.physics.Time;
@@ -58,24 +59,16 @@ public class World1SimulatorRunner<G> {
     public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
                 .initialPopulation(100)
-                .generationUsableSize(50)
+                .geneticAlgorithm(GeneticAlgorithm.<WorldScoreWithTrainingHistory>builder().generationUsableSize(50).build())
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
-                .otherScoresReceiver(this::otherScore)
                 .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
                 // .parallellism(1)
                 .build()
                 .runGeneticAlgorithmUntilStable();
         return bestScore;
     }
-
-
-    private void otherScore(WorldScoreWithTrainingHistory otherScore) {
-        otherScore.cleanupMemory();
-
-    }
-
 
     private void newBestScore(Pair<WorldScoreWithTrainingHistory, G> newTopScore) {
         bestScoreHistory.add(new Pair((System.currentTimeMillis() - realStartTime), newTopScore.getKey().score().getScoreValue()));
