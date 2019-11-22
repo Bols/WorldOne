@@ -41,4 +41,6 @@ public class GeneMap {
     public int hashCode() {
         return genes.hashCode();
     }
+
+
 }
