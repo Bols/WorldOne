@@ -1,7 +1,6 @@
 package no.bols.w1;
 
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import javafx.util.Pair;
 import lombok.Builder;
@@ -58,13 +57,13 @@ public class World1SimulatorRunner<G> {
 
     public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
-                .initialPopulation(100)
+                .initialPopulation(1)
                 .geneticAlgorithm(GeneticAlgorithm.<WorldScoreWithTrainingHistory>builder().generationUsableSize(50).build())
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
                 .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
-                // .parallellism(1)
+                .parallellism(1)
                 .build()
                 .runGeneticAlgorithmUntilStable();
         return bestScore;
@@ -79,7 +78,7 @@ public class World1SimulatorRunner<G> {
 
     public WorldScoreWithTrainingHistory rerunAndVisualize(Pair<WorldScoreWithTrainingHistory, G> score) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        new JFXPanel();
+        //new JFXPanel();
         jfxVisualize = new JfxVisualize();
         Time time = score.getKey().getTime();
         time.reset();

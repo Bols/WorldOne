@@ -1,9 +1,11 @@
 package no.bols.w1.genes.internal;//
 //
 
-import lombok.EqualsAndHashCode;
+import javafx.util.Pair;
+import no.bols.w1.genes.GeneScore;
 
-@EqualsAndHashCode
+import java.util.function.Function;
+
 public class DoubleGeneValue extends GeneValue<Double> {
 
 
@@ -46,5 +48,16 @@ public class DoubleGeneValue extends GeneValue<Double> {
     @Override
     public String toString() {
         return String.format("%3.2f", value);
+    }
+
+    @Override
+    public GeneValue<Double> nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue<Double>, Pair<GeneScore, GeneMap>> simulateChangedValue) {
+        final double range = geneParameterSpec.getMax() - geneParameterSpec.getMin();
+        final double infinitesimalChange = range / 100;
+        double scoreWithInfChange = simulateChangedValue.apply(new DoubleGeneValue(this.geneParameterSpec, this.value + infinitesimalChange)).getKey().getScore();
+        double infinitesimalScore = scoreWithInfChange - presentScore;
+        double differential = infinitesimalScore / infinitesimalChange;
+        double nextValue = this.value + differential * gamma * range;
+        return new DoubleGeneValue(this.geneParameterSpec, nextValue);
     }
 }
