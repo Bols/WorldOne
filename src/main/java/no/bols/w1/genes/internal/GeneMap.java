@@ -22,6 +22,16 @@ public class GeneMap {
         return new GeneMap(result);
     }
 
+    public GeneMap clone() {
+        HashMap<String, GeneValue> newGenes = new HashMap<>();
+        newGenes.putAll(genes);
+        return new GeneMap(newGenes);
+    }
+
+    public void setValue(String name, GeneValue value) {
+        this.genes.put(name, value);
+    }
+
     @Override
     public String toString() {
         return "{" + genes.entrySet().stream().

@@ -1,11 +1,8 @@
 package no.bols.w1.genes.internal;//
 //
 
-import lombok.EqualsAndHashCode;
-
 import java.util.Random;
 
-@EqualsAndHashCode
 public class BooleanGeneValue extends GeneValue<Boolean> {
 
 

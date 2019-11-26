@@ -31,11 +31,12 @@ public class TestGeneEngine
                 .scenarioTimeMs(25000)
                 .brainFactory(new TestBrainFactory())
                 .build();
-        Pair<Double, TestGenes> result = simulator.runGeneticAlgorithmUntilStable();
+        Pair<WorldScoreWithTrainingHistory, TestGenes> result = simulator.runGeneticAlgorithmUntilStable();
         TestGenes bestGene = result.getValue();
         for (int i = 0; i < TUNE_FACTOR_NUM; i++) {
             assertEquals(.5f, bestGene.moveParam[i], .05);
         }
+        assertTrue(bestGene.speedEnum == SpeedGene.fast);
     }
 
 
@@ -52,7 +53,7 @@ public class TestGeneEngine
             if (oneleg.getFoodProximityOutput() < genes.stopDistance) {
                 oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf() * genes.speedEnum.speedFactor);
             } else {
-                oneleg.motorOutput(genes.stopSpeed / 4);
+                oneleg.motorOutput(calculateOutputWithMaxValueAchievedAtMoveParamHalf() * genes.stopSpeed / 4);
             }
         }
 

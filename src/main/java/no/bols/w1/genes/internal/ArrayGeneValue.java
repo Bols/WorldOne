@@ -1,10 +1,16 @@
 package no.bols.w1.genes.internal;//
 //
 
+import javafx.util.Pair;
+import no.bols.w1.genes.GeneScore;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
     private final T[] value;
@@ -29,6 +35,10 @@ public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
         return value;
     }
 
+    public ArrayGeneValue<T> clone() {
+        return new ArrayGeneValue<>(value.clone());
+    }
+
     @Override
     public void assignToField(Field field, Object geneInstance) {
         Class<?> elementClass = field.getType().getComponentType();
@@ -43,11 +53,30 @@ public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
         }
     }
 
+
     @Override
     public String toString() {
         return "[" + Arrays.asList(value).stream()
                 .map(v -> v.toString())
                 .collect(Collectors.joining(","))
                 + "]";
+    }
+
+
+    @Override
+    public GeneValue<T[]> nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue<T[]>, Pair<GeneScore, GeneMap>> simulateChangedValue) {
+        if (!(value[0] instanceof DoubleGeneValue)) {
+            return this;
+        }
+        List<GeneValue<T>> valueList = (List<GeneValue<T>>) Arrays.asList(value);
+        Stream<GeneValue<T>> nextIncrementalValue = valueList.stream()
+                .parallel()
+                .map(v -> v.nextIncrementalValueForGradientDescent(presentScore, gamma, changedDouble -> {
+                            GeneValue<T>[] changedArray = value.clone();
+                            changedArray[valueList.indexOf(v)] = changedDouble;
+                            return simulateChangedValue.apply(new ArrayGeneValue(changedArray));
+                        })
+                );
+        return new ArrayGeneValue<>(nextIncrementalValue.collect(Collectors.toList()).toArray(value.clone()));
     }
 }
