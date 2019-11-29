@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
+public class ArrayGeneValue<T extends GeneValue> extends GeneValue {
     private final T[] value;
 
     public ArrayGeneValue(T[] value) {
@@ -64,15 +64,15 @@ public class ArrayGeneValue<T extends GeneValue> extends GeneValue<T[]> {
 
 
     @Override
-    public GeneValue<T[]> nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue<T[]>, Pair<GeneScore, GeneMap>> simulateChangedValue) {
+    public GeneValue nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue, Pair<? extends GeneScore, GeneMap>> simulateChangedValue) {
         if (!(value[0] instanceof DoubleGeneValue)) {
             return this;
         }
-        List<GeneValue<T>> valueList = (List<GeneValue<T>>) Arrays.asList(value);
-        Stream<GeneValue<T>> nextIncrementalValue = valueList.stream()
+        List<GeneValue> valueList = Arrays.asList(value);
+        Stream<GeneValue> nextIncrementalValue = valueList.stream()
                 .parallel()
                 .map(v -> v.nextIncrementalValueForGradientDescent(presentScore, gamma, changedDouble -> {
-                            GeneValue<T>[] changedArray = value.clone();
+                    GeneValue[] changedArray = value.clone();
                             changedArray[valueList.indexOf(v)] = changedDouble;
                             return simulateChangedValue.apply(new ArrayGeneValue(changedArray));
                         })

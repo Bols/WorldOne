@@ -1,7 +1,7 @@
 package no.bols.w1.genes.internal;//
 //
 
-public class EnumGeneValue extends GeneValue<Enum> {
+public class EnumGeneValue extends GeneValue {
     private EnumGeneSpec spec;
     private Enum value;
 

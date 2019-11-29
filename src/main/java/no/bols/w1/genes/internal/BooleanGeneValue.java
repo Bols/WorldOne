@@ -3,7 +3,7 @@ package no.bols.w1.genes.internal;//
 
 import java.util.Random;
 
-public class BooleanGeneValue extends GeneValue<Boolean> {
+public class BooleanGeneValue extends GeneValue {
 
 
     private BooleanGeneSpec booleanGeneSpec;

@@ -8,20 +8,20 @@ import java.lang.reflect.Field;
 import java.util.Random;
 import java.util.function.Function;
 
-public abstract class GeneValue<T> {
+public abstract class GeneValue {
     //protected GeneSpec<GeneValue<T>> geneSpec;
     //TODO: legg inn
 
 
     protected static Random random = new Random();
 
-    public abstract GeneValue<T> breed(GeneValue<T> other, double mutationChance);
+    public abstract GeneValue breed(GeneValue other, double mutationChance);
 
     protected boolean chance(double percent) {
         return random.nextDouble() < percent;
     }
 
-    public abstract T getValue();
+    public abstract Object getValue();
 
 
     public void assignToField(Field field, Object geneInstance) {
@@ -33,7 +33,7 @@ public abstract class GeneValue<T> {
     }
 
 
-    public GeneValue<T> nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue<T>, Pair<GeneScore, GeneMap>> simulateChangedValue) {
+    public GeneValue nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue, Pair<? extends GeneScore, GeneMap>> simulateChangedValue) {
         return this;
     }
 

@@ -6,7 +6,7 @@ import no.bols.w1.genes.GeneScore;
 
 import java.util.function.Function;
 
-public class DoubleGeneValue extends GeneValue<Double> {
+public class DoubleGeneValue extends GeneValue {
 
 
     private DoubleGeneSpec geneParameterSpec;
@@ -51,7 +51,7 @@ public class DoubleGeneValue extends GeneValue<Double> {
     }
 
     @Override
-    public GeneValue<Double> nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue<Double>, Pair<GeneScore, GeneMap>> simulateChangedValue) {
+    public GeneValue nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue, Pair<? extends GeneScore, GeneMap>> simulateChangedValue) {
         final double range = geneParameterSpec.getMax() - geneParameterSpec.getMin();
         final double infinitesimalChange = gamma / 20;
         double scoreWithInfChange = simulateChangedValue.apply(new DoubleGeneValue(this.geneParameterSpec, this.value + infinitesimalChange)).getKey().getScore();
