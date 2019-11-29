@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 public class GeneticAlgorithm<S extends GeneScore> {
 
     @Builder.Default
-    private int stableGenerationsLimit = 5;
+    private int stableGenerationsLimit = 10;
     @Builder.Default
     private int generationUsableSize = 16;
     @Builder.Default
-    private double mutationChance = .7;
+    private double mutationChance = .6;
 
     public void runGenerations(Map<String, GeneSpec> geneSpec, Function<List<GeneMap>, List<Pair<S, GeneMap>>> simulator, SortedSet<Pair<S, GeneMap>> results, Consumer<Pair<S, GeneMap>> bestScoreReceiver) {
         int numGenerations = 0;
