@@ -32,19 +32,21 @@ public class Engine<G, S extends GeneScore> {
     @Builder.Default
     private GeneticAlgorithm<S> geneticAlgorithm = GeneticAlgorithm.<S>builder().build();
 
+    private int numSimulations;
+
     public List<Pair<S, G>> runGeneticAlgorithmUntilStable() {
+        long startTime = System.currentTimeMillis();
         Map<String, GeneSpec> geneSpec = mapToGeneSpec(gene);
         ExecutorService executorService = Executors.newWorkStealingPool(parallellism);
         SortedSet<Pair<S, GeneMap>> results = new TreeSet<>((e1, e2) -> compare(e1, e2));
         findInitialCandidates(geneSpec, executorService, results);
 
-        results.addAll(results.stream().parallel()
-                .map(g -> GradientDescent.<S>builder().build().runGradientDescent(geneSpec, gm -> simulateCandidates(executorService, Collections.singletonList(gm)).get(0), g.getValue(), r -> bestScoreReceiver.accept(new Pair<>(r.getKey(), mapToGene(r.getValue())))))
-                .collect(Collectors.toList())
-        );
-
-
-        //geneticAlgorithm.runGenerations(geneSpec, g -> simulateCandidates(executorService, g), results, r -> bestScoreReceiver.accept(new Pair<>(r.getKey(), mapToGene(r.getValue()))));
+        geneticAlgorithm.runGenerations(geneSpec,
+                g -> simulateCandidates(executorService, g),
+                results,
+                r -> bestScoreReceiver.accept(new Pair<>(r.getKey(), mapToGene(r.getValue()))));
+        System.out.println("Stable result - #simulations=" + numSimulations + "(" + (System.currentTimeMillis() - startTime) / numSimulations + " msec/sim). " +
+                " Best scoreValue " + results.first().getKey() + " - " + results.first().getValue());
 
         List<Pair<S, G>> ret = results.stream()
                 .map(r -> new Pair<S, G>(r.getKey(), mapToGene(r.getValue())))
@@ -121,6 +123,7 @@ public class Engine<G, S extends GeneScore> {
 
 
     private List<Pair<S, GeneMap>> simulateCandidates(ExecutorService executorService, List<GeneMap> candidates) {
+        numSimulations += candidates.size();
         return
                 candidates.stream()
                         .map(gene -> executorService.submit(new SimulatorCallable(gene)))
