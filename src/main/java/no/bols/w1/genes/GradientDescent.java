@@ -38,7 +38,7 @@ public class GradientDescent<S extends GeneScore> {
                         .parallel()
                         .map(e -> new SimpleEntry<>(e.getKey(),
                                 e.getValue().nextIncrementalValueForGradientDescent(presentScore.getScore(), finalGamma,
-                                        (Function<GeneValue, Pair<S, GeneMap>>) (GeneValue changedGeneValue) -> simulateChange(simulator, changedGeneValue, e.getKey(), finalCurrent))))
+                                        changedGeneValue -> simulateChange(simulator, changedGeneValue, e.getKey(), finalCurrent))))
                         .collect(Collectors.toMap(
                                 Entry::getKey,
                                 Entry::getValue
