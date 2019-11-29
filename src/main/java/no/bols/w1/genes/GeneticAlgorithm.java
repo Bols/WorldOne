@@ -12,23 +12,23 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Builder
-public class GeneticAlgorithm<S extends Comparable> {
+public class GeneticAlgorithm<S extends GeneScore> {
 
     @Builder.Default
-    private int stableGenerationsLimit = 20;
+    private int stableGenerationsLimit = 5;
     @Builder.Default
     private int generationUsableSize = 16;
     @Builder.Default
-    private double mutationChance = .3;
+    private double mutationChance = .7;
 
-    public void runGenerations(Map<String, GeneSpec> geneSpec, Function<Set<GeneMap>, List<Pair<S, GeneMap>>> simulator, SortedSet<Pair<S, GeneMap>> results, Consumer<Pair<S, GeneMap>> bestScoreReceiver) {
-        long startTime = System.currentTimeMillis();
+    public void runGenerations(Map<String, GeneSpec> geneSpec, Function<List<GeneMap>, List<Pair<S, GeneMap>>> simulator, SortedSet<Pair<S, GeneMap>> results, Consumer<Pair<S, GeneMap>> bestScoreReceiver) {
         int numGenerations = 0;
         double effectiveMutationchance = this.mutationChance / geneSpec.size();
         int topScoreUnchangedGenerations = 0;
         S topScore = null;
         while (topScoreUnchangedGenerations < stableGenerationsLimit) {
             numGenerations++;
+            System.out.println("---------- Generation " + numGenerations);
             List<Pair<S, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
             //            System.out.println("-------------------- Top list generation "+generations);
             //            for (Pair<S, GeneMap> sGeneMapPair : topList) {
@@ -37,18 +37,21 @@ public class GeneticAlgorithm<S extends Comparable> {
             //            System.out.println("-----------");
 
 
-            Set<GeneMap> newGeneration = new HashSet<>();
-            for (int i = 1; i < 5; i++) {                // Take 5 offspring of the top contenders
-                newGeneration.add(topList.get(0).getValue().breed(topList.get(1).getValue(), effectiveMutationchance));
-            }
+            List<GeneMap> newGeneration = new ArrayList<>();
             topList.forEach(parent1 ->
             {
-                GeneMap parent2 = topList.get(new Random().nextInt(generationUsableSize)).getValue();
+                GeneMap parent2 = topList.get(new Random().nextInt(Math.min(generationUsableSize, topList.size()))).getValue();
                 GeneMap offspring = parent1.getValue().breed(parent2, effectiveMutationchance);
                 newGeneration.add(offspring);
             });
             List<Pair<S, GeneMap>> newResults = simulator.apply(newGeneration);
-            results.addAll(newResults);
+            int finalNumGenerations = numGenerations;
+            newResults.forEach(untunedResult -> {
+                        Pair<S, GeneMap> optimizedValue = untunedResult;//GradientDescent.<S>builder().gammaStartVal(5.0).precision(.5).build().runGradientDescent(geneSpec, gm -> simulator.apply(Collections.singletonList(gm)).get(0), untunedResult.getValue());
+                        results.add(optimizedValue);
+                    }
+            );
+
             if (topScore == null || topScore.compareTo(results.first().getKey()) < 0) {
                 topScore = results.first().getKey();
                 topScoreUnchangedGenerations = 0;
@@ -60,11 +63,11 @@ public class GeneticAlgorithm<S extends Comparable> {
             } else {
                 topScoreUnchangedGenerations++;
             }
-
-
         }
-        System.out.println("Stable result - #sim=" + results.size() + "(" + (System.currentTimeMillis() - startTime) / results.size() + " msec/sim). " +
-                "#Generations:" + numGenerations + "  Best scoreValue " + results.first().getKey() + " - " + results.first().getValue());
-
+        Pair<S, GeneMap> tunedTop = GradientDescent.<S>builder().gammaStartVal(.1).precision(.0001).build().runGradientDescent(geneSpec, gm -> simulator.apply(Collections.singletonList(gm)).get(0), results.first().getValue());
+        if (tunedTop.getKey().getScore() > results.first().getKey().getScore()) {
+            bestScoreReceiver.accept(tunedTop);
+            results.add(tunedTop);
+        }
     }
 }

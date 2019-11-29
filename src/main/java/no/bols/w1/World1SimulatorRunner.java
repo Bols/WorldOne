@@ -57,13 +57,13 @@ public class World1SimulatorRunner<G> {
 
     public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
-                .initialPopulation(1)
+                .initialPopulation(100)
                 .geneticAlgorithm(GeneticAlgorithm.<WorldScoreWithTrainingHistory>builder().generationUsableSize(50).build())
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
                 .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
-                .parallellism(1)
+                .parallellism(8)
                 .build()
                 .runGeneticAlgorithmUntilStable();
         return bestScore;

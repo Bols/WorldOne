@@ -8,7 +8,6 @@ import no.bols.w1.genes.internal.GeneSpec;
 import no.bols.w1.genes.internal.GeneValue;
 
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,22 +17,23 @@ import static java.util.AbstractMap.SimpleEntry;
 @Builder
 public class GradientDescent<S extends GeneScore> {
     @Builder.Default
-    double gammaStartVal = 1.0;
+    double gammaStartVal = 5.0;
 
     @Builder.Default
     double precision = 0.01;
 
-    public Pair<S, GeneMap> runGradientDescent(Map<String, GeneSpec> geneSpec, Function<GeneMap, Pair<S, GeneMap>> simulator, GeneMap initialValues, Consumer<Pair<S, GeneMap>> bestScoreReceiver) {
+    public Pair<S, GeneMap> runGradientDescent(Map<String, GeneSpec> geneSpec, Function<GeneMap, Pair<S, GeneMap>> simulator, GeneMap initialValues) {
         double gamma = gammaStartVal;
         GeneMap current = initialValues;
         S currentScore = null;
-        while (gamma > precision) {
+        do {
             final GeneMap finalCurrent = current;
             final S presentScore = simulator.apply(finalCurrent).getKey();
             S newScore;
             GeneMap candidate;
             do {
                 double finalGamma = gamma;
+                System.out.println("\tCalculating Diff");
                 Map<String, GeneValue> nextStep = current.genes.entrySet().stream()
                         .parallel()
                         .map(e -> new SimpleEntry<>(e.getKey(),
@@ -44,15 +44,17 @@ public class GradientDescent<S extends GeneScore> {
                                 Entry::getValue
                         ));
                 candidate = new GeneMap(nextStep);
+
                 newScore = simulator.apply(candidate).getKey();
-                if (newScore.getScore() < presentScore.getScore()) {
+                if (newScore.getScore() <= presentScore.getScore()) {
                     gamma = gamma / 2;
                 }
+                System.out.println("New iteration, gamma = " + gamma);
+
             } while (gamma > precision && newScore.getScore() < presentScore.getScore());
             currentScore = newScore;
             current = candidate;
-        }
-        System.out.println("Finished: " + currentScore);
+        } while (gamma > precision);
         return new Pair<>(currentScore, current);
     }
 
