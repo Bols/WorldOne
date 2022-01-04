@@ -40,7 +40,7 @@ public class TestPhysics
 
 
         private void moveUntilNextToFood(Time time) {
-            if (oneleg.getFoodProximityOutput() < .94) {
+            if (oneleg.getFoodProximityOutput() < .99) {
                 oneleg.motorOutput(1.0);
             } else {
                 oneleg.motorOutput(0.0);
