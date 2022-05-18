@@ -8,9 +8,6 @@ import no.bols.w1.ai.BrainGene;
 import no.bols.w1.ai.NeuralBrainFactory;
 import no.bols.w1.genes.internal.GeneMap;
 
-/**
- * Unit test for simple App.
- */
 public class TestNeuronBrain
         extends TestCase {
 
@@ -21,6 +18,7 @@ public class TestNeuronBrain
     public static Test suite() {
         return new TestSuite(TestNeuronBrain.class);
     }
+
 
     public void testNeuronBrainScore() {
         World1SimulatorRunner simulator = World1SimulatorRunner.<BrainGene>builder()

@@ -115,7 +115,7 @@ public class World1SimulatorRunner<G> {
         for (Pair<Long, Double> longDoublePair : bestScoreHistory) {
             jfxVisualize.addDataPoint("Gene tuning best scoreValue", 0, longDoublePair.getKey(), longDoublePair.getValue());
         }
-        Platform.runLater(() -> {
+        Platform.startup(() -> {
             Stage stage = new Stage();
             stage.setOnHiding(event -> countDownLatch.countDown());
             jfxVisualize.start(stage);
