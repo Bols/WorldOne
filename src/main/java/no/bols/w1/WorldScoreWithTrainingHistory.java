@@ -2,6 +2,7 @@ package no.bols.w1;//
 //
 
 import lombok.Getter;
+import no.bols.w1.genes.GeneScore;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.Time;
 import no.bols.w1.physics.WorldScore;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
-public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithTrainingHistory> {
+public class WorldScoreWithTrainingHistory extends GeneScore {
     private Time time;
     private Brain brain;
     private List<WorldScore> history = new ArrayList<>();
@@ -44,11 +45,6 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
     }
 
     @Override
-    public int compareTo(WorldScoreWithTrainingHistory o) {
-        return score().compareTo(o.score());
-    }
-
-    @Override
     public String toString() {
         String score = f(score().getScoreValue()) + " dist:" + f(score().getDistanceTraveled()) + " food:" + score().getFoodEaten();
         String historyString = history.size() < 2 ? "" : "[" + history.stream().map(h -> f(h.getScoreValue())).collect(Collectors.joining(",")) + "]";
@@ -62,5 +58,10 @@ public class WorldScoreWithTrainingHistory implements Comparable<WorldScoreWithT
     public void cleanupMemory() {
         this.time = null;
         this.brain = null;
+    }
+
+    @Override
+    public double getScore() {
+        return score().getScoreValue();
     }
 }
