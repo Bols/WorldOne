@@ -69,7 +69,7 @@ public class World1SimulatorRunner<G> {
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
-                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .1)
+                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
                 .parallellism(8)
                 .build()
                 .runGeneticAlgorithmUntilStable();

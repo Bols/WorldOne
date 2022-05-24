@@ -34,7 +34,7 @@ public class GeneticAlgorithm<S extends GeneScore> {
             List<Pair<S, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
             System.out.println("-------------------- Top list generation " + numGenerations);
             for (Pair<S, GeneMap> sGeneMapPair : topList) {
-                System.out.print(sGeneMapPair.getKey().getScore() + ", ");
+                System.out.printf("%.3f, ", sGeneMapPair.getKey().getScore());
             }
             System.out.println("-----------");
 
