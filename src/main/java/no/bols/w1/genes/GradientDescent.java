@@ -37,8 +37,8 @@ public class GradientDescent<S extends GeneScore> {
                 Map<String, GeneValue> nextStep = current.genes.entrySet().stream()
                         .parallel()
                         .map(e -> new SimpleEntry<>(e.getKey(),
-                                e.getValue().nextIncrementalValueForGradientDescent(presentScore.getScore(), finalGamma,
-                                        changedGeneValue -> simulateChange(simulator, changedGeneValue, e.getKey(), finalCurrent))))
+                                    e.getValue().nextIncrementalValueForGradientDescent(presentScore.getScore(), finalGamma,
+                                            changedGeneValue -> simulateChange(simulator, changedGeneValue, e.getKey(), finalCurrent))))
                         .collect(Collectors.toMap(
                                 Entry::getKey,
                                 Entry::getValue

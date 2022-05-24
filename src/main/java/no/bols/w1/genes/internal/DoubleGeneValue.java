@@ -53,11 +53,20 @@ public class DoubleGeneValue extends GeneValue {
     @Override
     public GeneValue nextIncrementalValueForGradientDescent(double presentScore, double gamma, Function<GeneValue, Pair<? extends GeneScore, GeneMap>> simulateChangedValue) {
         final double range = geneParameterSpec.getMax() - geneParameterSpec.getMin();
-        final double infinitesimalChange = gamma / 20;
-        double scoreWithInfChange = simulateChangedValue.apply(new DoubleGeneValue(this.geneParameterSpec, this.value + infinitesimalChange)).getKey().getScore();
+        final double infinitesimalChange = gamma * range / 20;
+        double infitesimalVal = this.value + infinitesimalChange;
+        double scoreWithInfChange = simulateChangedValue.apply(new DoubleGeneValue(this.geneParameterSpec, infitesimalVal)).getKey().getScore();
         double infinitesimalScore = scoreWithInfChange - presentScore;
         double differential = infinitesimalScore / infinitesimalChange;
-        double nextValue = this.value + differential * gamma * range;
-        return new DoubleGeneValue(this.geneParameterSpec, nextValue);
+        double nextValCandidate = this.value + differential * gamma * range;
+        double scoreWithCalculatedDiff = simulateChangedValue.apply(new DoubleGeneValue(this.geneParameterSpec, nextValCandidate)).getKey().getScore();
+        if (presentScore > scoreWithCalculatedDiff && presentScore > scoreWithInfChange) {
+            nextValCandidate = this.value;
+        } else {
+            if (scoreWithInfChange > scoreWithCalculatedDiff) {
+                nextValCandidate = infitesimalVal;
+            }
+        }
+        return new DoubleGeneValue(this.geneParameterSpec, nextValCandidate);
     }
 }

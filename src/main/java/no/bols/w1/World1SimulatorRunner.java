@@ -6,6 +6,7 @@ import javafx.util.Pair;
 import lombok.Builder;
 import no.bols.w1.genes.Engine;
 import no.bols.w1.genes.GeneticAlgorithm;
+import no.bols.w1.genes.GradientDescent;
 import no.bols.w1.physics.Brain;
 import no.bols.w1.physics.JfxVisualize;
 import no.bols.w1.physics.Time;
@@ -58,11 +59,17 @@ public class World1SimulatorRunner<G> {
     public Pair<WorldScoreWithTrainingHistory, G> runGeneticAlgorithmUntilStable() {
         List<Pair<WorldScoreWithTrainingHistory, G>> ret = Engine.<G, WorldScoreWithTrainingHistory>builder()
                 .initialPopulation(100)
-                .geneticAlgorithm(GeneticAlgorithm.<WorldScoreWithTrainingHistory>builder().generationUsableSize(50).build())
+                .geneticAlgorithm(GeneticAlgorithm.<WorldScoreWithTrainingHistory>builder()
+                        .generationUsableSize(50)
+                        .stableGenerationsLimit(20)
+                        .gradientDescentBuilder(GradientDescent.<WorldScoreWithTrainingHistory>builder()
+                                .gammaStartVal(.1)
+                                .precision(.0001))
+                        .build())
                 .evalFunction(g -> this.evaluate(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
-                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
+                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .1)
                 .parallellism(8)
                 .build()
                 .runGeneticAlgorithmUntilStable();

@@ -20,6 +20,8 @@ public class GeneticAlgorithm<S extends GeneScore> {
     private int generationUsableSize = 16;
     @Builder.Default
     private double mutationChance = .6;
+    @Builder.Default
+    private GradientDescent.GradientDescentBuilder<S> gradientDescentBuilder = null;
 
     public void runGenerations(Map<String, GeneSpec> geneSpec, Function<List<GeneMap>, List<Pair<S, GeneMap>>> simulator, SortedSet<Pair<S, GeneMap>> results, Consumer<Pair<S, GeneMap>> bestScoreReceiver) {
         int numGenerations = 0;
@@ -30,11 +32,11 @@ public class GeneticAlgorithm<S extends GeneScore> {
             numGenerations++;
             System.out.println("---------- Generation " + numGenerations);
             List<Pair<S, GeneMap>> topList = results.stream().limit(generationUsableSize).collect(Collectors.toList());
-            //            System.out.println("-------------------- Top list generation "+generations);
-            //            for (Pair<S, GeneMap> sGeneMapPair : topList) {
-            //                System.out.println(sGeneMapPair.getKey()+" "+sGeneMapPair.getValue());
-            //            }
-            //            System.out.println("-----------");
+            System.out.println("-------------------- Top list generation " + numGenerations);
+            for (Pair<S, GeneMap> sGeneMapPair : topList) {
+                System.out.print(sGeneMapPair.getKey().getScore() + ", ");
+            }
+            System.out.println("-----------");
 
 
             List<GeneMap> newGeneration = new ArrayList<>();
@@ -64,10 +66,13 @@ public class GeneticAlgorithm<S extends GeneScore> {
                 topScoreUnchangedGenerations++;
             }
         }
-        Pair<S, GeneMap> tunedTop = GradientDescent.<S>builder().gammaStartVal(.1).precision(.0001).build().runGradientDescent(geneSpec, gm -> simulator.apply(Collections.singletonList(gm)).get(0), results.first().getValue());
-        if (tunedTop.getKey().getScore() > results.first().getKey().getScore()) {
-            bestScoreReceiver.accept(tunedTop);
-            results.add(tunedTop);
+        if (gradientDescentBuilder != null) {
+            System.out.println("Best score, tuning with gradient descent: " + topScore);
+            Pair<S, GeneMap> tunedTop = gradientDescentBuilder.build().runGradientDescent(geneSpec, gm -> simulator.apply(Collections.singletonList(gm)).get(0), results.first().getValue());
+            if (tunedTop.getKey().getScore() > results.first().getKey().getScore()) {
+                bestScoreReceiver.accept(tunedTop);
+                results.add(tunedTop);
+            }
         }
     }
 }
