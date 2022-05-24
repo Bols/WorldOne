@@ -42,7 +42,7 @@ public class GeneticAlgorithm<S extends GeneScore> {
             List<GeneMap> newGeneration = new ArrayList<>();
             topList.forEach(parent1 ->
             {
-                GeneMap parent2 = topList.get(new Random().nextInt(Math.min(generationUsableSize, topList.size()))).getValue();
+                GeneMap parent2 = topList.get((int) (Math.pow(new Random().nextDouble(), 4)) * topList.size()).getValue();
                 GeneMap offspring = parent1.getValue().breed(parent2, effectiveMutationchance);
                 newGeneration.add(offspring);
             });
