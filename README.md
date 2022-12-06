@@ -16,16 +16,19 @@ The virtual world and the neuron implementation is based on an event-driven mech
 Parallellizing the event-driven mechanism is also possible, but there are some potential pitfalls regarding timing and look-ahead that may limit the amount of parallellization. This implementation circumvent all of this by running a simulation single-threaded but spawning out all the simulations of the EA population in parallell.
 
 ### Evolution algorithm library
-This was implemented from scratch as I was not happy with the performance and API of the current java-based EA libraries. The gene-class is annotated with gene type and the range of the values.  
+This was implemented from scratch as I was not happy with the performance and API of the current java-based EA libraries. 
+The gene-class is annotated with gene type and the range of the values. Two individuals can be recombined into one, with a random chance of selecting traits from each parent, and a configurable chance of mutation of each gene.
+The evolution algorithm also supports a gradient descent-approach for fine-tuning gene parameters. Given the main mechanism of the scenario simulation, the loss/fitness function is obviously not differentiable with respect to the gene values. So to achieve a similar functionality, the gradient descent will tune each of the gene-values a small amount up or down, and see which way this affects the total fitness, and then move in the direction of total better fitness. This approach is very much dependent on the scenario score being very stable, with no randomization between runs, and may not be appropriate in all cases. 
 
 Currently missing is some sort of mechanism for ensuring that mutated individuals that differ significantly from the leaders are not eradicated by the main winning population, but allowed to evolve and settle into a potentially better solution.
 
 ### Neuron/Brain implementation
-This is currently only 
+This part has been barely started, with the chosen approach being hebbian STDP with dopamine as a modulator.
 
-
-### Evolution Algorithm overview
-
+### Evolution process
+* Each simulation starts with the same state, and the agent is run until a satisfactory score or scenario time limit is reached. The same individual is then rerun again in exactly the same scenario, but this time keeping the neuronal weights and state from the previous run. This is repeated as long as the individual keeps improving the score. When the score does not improve anymore, this single simulation is finished, and the score of the last run is recorded.
+* First random individuals will be created and tested in the simulation until a minimum (100) number of individuals are found that comply with a lower threshold score. Depending on the complexity of the gene model, the complexity of the task, and the selected threshold score this may take some time. The accepted individuals are the first generation
+* After this, a new generation is picked by combining the genes of two and two individuals, with the top performers being more likely to procreate. The whole new generation is then simulated, and the best performers are kept as parents for the next generation.
 
 After execution, the algorithm will re-run the winning candidate with a few metrics enabled, and then display a graphical presentation of the agent movement, success and neuronal activity.
 
