@@ -1,10 +1,10 @@
 # WorldOne, take #1      
 
 This is the framework for a sandbox bio-inspired AI using genes and an evolution algorithm to optimize the outcome of an agent in a 1-dimensional world. This will later be extended to a 2/3-dimensional world when viability has been established. 
-*Note*: this project was started in 2018 during christmas holiday. The physics and evolution algorithm part are semi-complete, but the neuron/brain implementation is still in the skeleton stage.
+*Note*: this project was started in 2018 during a christmas holiday, and has been actively worked on only in brief periods. The physics and evolution algorithm part are semi-complete, but the neuron/brain implementation is still in the skeleton stage.
 
 ### Main principles
-This project simulates a theoretical agent (named oneleg, since it only has a single motion-generating output) that moves along an axis in a virtual 1-dimensional world, and feeds by stopping at certain points where food has been placed. The agent has sensors that are continously updated with distance to food in sync with its motions, and sensors for eating, which should be connected to a reward/reinforcement catalyst similar to dopamine. The brain of this agent is/will be be a spiking neural network that is parameterized using genes that control how neurons form, grow, and communicate, and how they are affected by the reinforcement modulator (dopamine).
+This project simulates a theoretical agent (named oneleg, since it only has a single motion-generating output) that moves along an axis in a virtual 1-dimensional world, and feeds by stopping at certain points where food has been placed. The agent has sensors that are continously updated with distance to food in sync with its motions, and sensors for eating, which should be connected to a reward/reinforcement catalyst similar to dopamine. The brain of this agent is/will be be a spiking neural network that is parameterized using genes that control how neurons form, grow, reinforce weights and communicate, and how they are affected by the reinforcement modulator (dopamine).
 
 * Start with extremely simple reinforcement tasks - starting with human-level-tasks will lead to missing out on finding the principles of general problem-solving behavior  
 * Embodied agent - because that is how the only known general intelligence works. The concept of predictive processing is likely a major foundation of the mammalian brains, and requires a constant feed of sensor input that can be correlated with the motor output to create the concept of expecation and surprise
@@ -15,13 +15,18 @@ This project simulates a theoretical agent (named oneleg, since it only has a si
 The virtual world and the neuron implementation is based on an event-driven mechanism where individual spikes are communicated as events between the nodes in the network, rather than having a time-step simulation which is probably more common. An event-based approach will on normal hardware be orders of magnitude faster, especially on networks with sparse spiking activity. The downside is that the neuron membrane potential changes and decay should preferrably be calculated by finding  solutions to the model differential equations rather than simulating the changes over time. 
 Parallellizing the event-driven mechanism is also possible, but there are some potential pitfalls regarding timing and look-ahead that may limit the amount of parallellization. This implementation circumvent all of this by running a simulation single-threaded but spawning out all the simulations of the EA population in parallell.
 
-### Evolution algorithm
-This was implemented from scratch as I was not happy with the performance and API of the current java-based EA libraries. 
+### Evolution algorithm library
+This was implemented from scratch as I was not happy with the performance and API of the current java-based EA libraries. The gene-class is annotated with gene type and the range of the values.  
 
+Currently missing is some sort of mechanism for ensuring that mutated individuals that differ significantly from the leaders are not eradicated by the main winning population, but allowed to evolve and settle into a potentially better solution.
 
 ### Neuron/Brain implementation
-
+This is currently only 
 
 
 ### Evolution Algorithm overview
-1. The evolution algorithm gener
+
+
+After execution, the algorithm will re-run the winning candidate with a few metrics enabled, and then display a graphical presentation of the agent movement, success and neuronal activity.
+
+![oneworldresults](https://user-images.githubusercontent.com/131504/206002365-76696328-4879-44f2-8523-3134aecda20f.png)
