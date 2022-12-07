@@ -5,11 +5,10 @@ This is the framework for a sandbox bio-inspired AI using genes and an evolution
 
 ### Main principles
 This project simulates a theoretical agent (named oneleg, since it only has a single motion-generating output) that moves along an axis in a virtual 1-dimensional world, and feeds by stopping at certain points where food has been placed. The agent has sensors that are continously updated with distance to food in sync with its motions, and sensors for eating, which should be connected to a reward/reinforcement catalyst similar to dopamine. The brain of this agent is/will be be a spiking neural network that is parameterized using genes that control how neurons form, grow, reinforce weights and communicate, and how they are affected by the reinforcement modulator (dopamine).
-
-* Start with extremely simple reinforcement tasks - starting with human-level-tasks will lead to missing out on finding the principles of general problem-solving behavior  
-* Embodied agent - because that is how the only known general intelligence works. The concept of predictive processing is likely a major foundation of the mammalian brains, and requires a constant feed of sensor input that can be correlated with the motor output to create the concept of expecation and surprise
+The motivation for this setup is the following key assumptions about how to explore the concept of biologically inspired intelligence:
+* Begin with extremely simple reinforcement tasks - expecting to solve human-level tasks from the start will lead to missing out on finding the principles of general problem-solving behavior  
+* Embodied agent - because that is how the only known general intelligence works. The concept of predictive processing seems to be a major foundation of the mammalian brains, and requires a constant feed of sensor input that can be correlated with the motor output and previous experience to create the concept of expecation and surprise
 * Evolve the neuron parameters using an indirect approach, where the genes are tied to the neuron population - not to an individual neuron.
-
 
 ### Physics implementation
 The virtual world and the neuron implementation is based on an event-driven mechanism where individual spikes are communicated as events between the nodes in the network, rather than having a time-step simulation which is probably more common. An event-based approach will on normal hardware be orders of magnitude faster, especially on networks with sparse spiking activity. The downside is that the neuron membrane potential changes and decay should preferrably be calculated by finding  solutions to the model differential equations rather than simulating the changes over time. 
