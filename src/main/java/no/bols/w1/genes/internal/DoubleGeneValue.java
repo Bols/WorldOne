@@ -21,9 +21,9 @@ public class DoubleGeneValue extends GeneValue {
     public DoubleGeneValue breed(GeneValue other, double mutationChance) {
         DoubleGeneValue otherValue = (DoubleGeneValue) other;
         if (!chance(mutationChance)) {
-            double diff = Math.max(value, otherValue.getValue()) - Math.min(value, otherValue.getValue());
+            double diff = Math.abs(value-otherValue.getValue());
             double average = (value + otherValue.getValue()) / 2.0;
-            if (chance(mutationChance)) {
+            if (chance(.5)) {
                 return new DoubleGeneValue(geneParameterSpec, average + random.nextDouble() * .2 - .1);
             } else {
                 double childVal = average + (random.nextDouble() * 1.4 - .7) * diff;

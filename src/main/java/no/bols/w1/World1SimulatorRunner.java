@@ -36,7 +36,7 @@ public class World1SimulatorRunner<G> {
         this.brainFactory = brainFactory;
     }
 
-    private WorldScoreWithTrainingHistory evaluate(G genes) {
+    public WorldScoreWithTrainingHistory createBrainAndRunScenarioUntilStable(G genes) {
         Time time = new Time();
         Brain brain = brainFactory.createBrain(time, genes);
         WorldScoreWithTrainingHistory score = runScenarioTrainingUntilStable(time, brain);
@@ -66,10 +66,10 @@ public class World1SimulatorRunner<G> {
                                 .gammaStartVal(.1)
                                 .precision(.0001))
                         .build())
-                .evalFunction(g -> this.evaluate(g))
+                .evalFunction(g -> this.createBrainAndRunScenarioUntilStable(g))
                 .gene(brainFactory.geneSpec())
                 .bestScoreReceiver(this::newBestScore)
-                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .01)
+                .filterInitialPopulation(p -> p.getKey().score().getScoreValue() > .02)
                 .parallellism(8)
                 .build()
                 .runGeneticAlgorithmUntilStable();
@@ -85,30 +85,24 @@ public class World1SimulatorRunner<G> {
 
     public WorldScoreWithTrainingHistory rerunAndVisualize(Pair<WorldScoreWithTrainingHistory, G> score) {
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        //new JFXPanel();
         jfxVisualize = new JfxVisualize();
-        Time time = score.getKey().getTime();
-        time.reset();
+        Time time = new Time();
         time.gatherStats(true);
         Brain blankBrain = brainFactory.createBrain(time, score.getValue());
-        WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
+        WorldScoreWithTrainingHistory rerunScoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
         Time.RecurringEvent graphEvent = null;
         do {
-
-            if (graphEvent != null) {
-                time.unScheduleRecurringEvent(graphEvent);
-            }
-            time.reset();
             Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, blankBrain);
             Map<String, Double> oldValues = new HashMap<>();
             graphEvent = time.scheduleRecurringEvent(t -> {
-                jfxVisualize.addDataPoint("Position", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
-                jfxVisualize.addDataPoint("Motoroutput", scoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getLastMotorOutput());
+                jfxVisualize.addDataPoint("Position", rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
+                jfxVisualize.addDataPoint("Motoroutput", rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getLastMotorOutput());
+                jfxVisualize.addDataPoint("Food eaten",rerunScoreList.getHistory().size(),t.getSimulatedTime().ms(),simulationWorld.getFoodAmountEaten());
                 for (Map.Entry<String, DoubleAdder> statEntry : time.getStats().entrySet()) {
                     Double previousValue = oldValues.get(statEntry.getKey());
                     double newValue = statEntry.getValue().doubleValue();
-                    jfxVisualize.addDataPoint(statEntry.getKey(), scoreList.getHistory().size(), t.getSimulatedTime().ms(), newValue - (previousValue != null ? previousValue : 0));
+                    jfxVisualize.addDataPoint(statEntry.getKey(), rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), newValue - (previousValue != null ? previousValue : 0));
                     oldValues.put(statEntry.getKey(), newValue);
                 }
 
@@ -116,8 +110,12 @@ public class World1SimulatorRunner<G> {
             }, 100);
 
             time.runUntil(t -> t.timeSince(startTime) > scenarioTimeMs);
-            scoreList.addScore(simulationWorld.score());
-        } while (scoreList.lastScoreWasImprovement());
+            rerunScoreList.addScore(simulationWorld.score());
+            time.unScheduleRecurringEvent(graphEvent);
+            time.reset();
+        } while (rerunScoreList.lastScoreWasImprovement());
+
+        System.out.println("Visualization rerun :"+rerunScoreList.toString());
 
         for (Pair<Long, Double> longDoublePair : bestScoreHistory) {
             jfxVisualize.addDataPoint("Gene tuning best scoreValue", 0, longDoublePair.getKey(), longDoublePair.getValue());
@@ -133,12 +131,7 @@ public class World1SimulatorRunner<G> {
             throw new RuntimeException(e);
         }
         Platform.exit();
-        System.out.println("----------- Result stats ----------------");
-        System.out.println(score.getKey());
-        System.out.println("Real-clock runtime:  " + time.getRealClockRuntime());
-        System.out.println("Events handled: " + time.getEventsHandled());
-        System.out.println("Stats: " + time.getStats().entrySet().stream().map(e -> e.getKey() + ":" + e.getValue().doubleValue()).collect(Collectors.joining(",")));
-        return scoreList;
+        return rerunScoreList;
     }
 
 }

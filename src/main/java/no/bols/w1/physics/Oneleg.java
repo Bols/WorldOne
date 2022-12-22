@@ -49,7 +49,7 @@ public class Oneleg extends PhysObject {
     }
 
     private boolean canEat() {
-        return lastMotorOutput < .01 && isInEatingDistance();
+        return lastMotorOutput < .001 && isInEatingDistance();
     }
 
     public boolean isInEatingDistance() {

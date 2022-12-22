@@ -24,9 +24,9 @@ public class World {
     }
 
     public WorldScore score() {
-        double eaten = foodEaten + (1 - currentFood.getFoodAmount());
+
         double moveAmount = oneleg.getPosition() / 100.0;
-        double score = eaten + (moveAmount > 1.0 ? 1.0 : moveAmount);
+        double score = getFoodAmountEaten() + (moveAmount > 1.0 ? 1.0 : moveAmount);
         return new WorldScore(score, oneleg.getPosition(), foodEaten);
     }
 
@@ -36,8 +36,12 @@ public class World {
         placeFood();
     }
 
+    public double getFoodAmountEaten(){
+        return foodEaten + (1 - currentFood.getFoodAmount());
+    }
+
     private void placeFood() {
-        double newPosition = lastFoodPosition + 10;
+        double newPosition = lastFoodPosition + 2;
         this.currentFood = new Food(newPosition, this);
         lastFoodPosition = newPosition;
     }

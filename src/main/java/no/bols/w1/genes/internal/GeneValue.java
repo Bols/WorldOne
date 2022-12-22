@@ -17,8 +17,8 @@ public abstract class GeneValue {
 
     public abstract GeneValue breed(GeneValue other, double mutationChance);
 
-    protected boolean chance(double percent) {
-        return random.nextDouble() < percent;
+    protected boolean chance(double probability) {
+        return random.nextDouble() < probability;
     }
 
     public abstract Object getValue();

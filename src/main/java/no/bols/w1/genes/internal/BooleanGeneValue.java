@@ -29,8 +29,8 @@ public class BooleanGeneValue extends GeneValue {
         }
     }
 
-    protected boolean chance(double percent) {
-        return random.nextDouble() < percent;
+    protected boolean chance(double probability) {
+        return random.nextDouble() < probability;
     }
 
     @Override

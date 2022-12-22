@@ -1,7 +1,6 @@
 package no.bols.w1.physics;//
 //
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.*;
@@ -11,6 +10,7 @@ import java.util.function.Predicate;
 
 public class Time {
     public static int BATCH_SIZE = 1000;
+    public static long eventid=0;
     private long timeMilliSeconds;
     private long iteration = 0;
     private PriorityQueue<Event> scheduledEvents;
@@ -47,14 +47,14 @@ public class Time {
             throw new RuntimeException("No scheduled events. Simulation not initialized");
         }
         while (!stopCriteria.test(this) && !timeOut) {
-            for (int i = 0; i < BATCH_SIZE; i++) {  //replace with thread
+//            for (int i = 0; i < BATCH_SIZE; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.remove();
-                timeMilliSeconds = firstEvent.timeOffsetMilliSeconds;
+                timeMilliSeconds = firstEvent.timeMs;
                 firstEvent.eventHandler.accept(this);     //TODO: eventhandler bør også inneholde en metode for å oppdatere tilstand til siste
                 firstEvent.afterEvent(this);
                 eventsHandled++;
-            }
-            long realtime = System.currentTimeMillis() - startClockTime;
+//            }
+//            long realtime = System.currentTimeMillis() - startClockTime;
 //            if (scheduledEvents.size() > 10000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
 //                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
 //                timeOut = true;
@@ -76,7 +76,7 @@ public class Time {
         timeMilliSeconds = 0;
         scheduledEvents = new PriorityQueue<>();
         eventsHandled = 0;
-        recurringEventsList.forEach(scheduledEvents::add);
+        recurringEventsList.forEach(e -> {e.timeMs=e.intervalMilliseconds;scheduledEvents.add(e);});
         stats = new HashMap<>();
     }
 
@@ -93,13 +93,23 @@ public class Time {
         return getSimulatedTime().timeSince(startTime);
     }
 
-    @AllArgsConstructor
     private static class Event implements Comparable<Event> {
+        private final long id;
         protected Consumer<Time> eventHandler;
-        protected long timeOffsetMilliSeconds;
+        protected long timeMs;
+
+        public Event(Consumer<Time> eventHandler, long timeMs) {
+            this.eventHandler = eventHandler;
+            this.timeMs = timeMs;
+            this.id = eventid++;
+        }
 
         public int compareTo(Event o) {
-            return Long.compare(this.timeOffsetMilliSeconds, o.timeOffsetMilliSeconds);
+            int timeCompare = Long.compare(this.timeMs, o.timeMs);
+            if(timeCompare==0){
+                return Long.compare(this.id,o.id);
+            }
+            return timeCompare;
         }
 
         public void afterEvent(Time time) {
@@ -116,7 +126,8 @@ public class Time {
 
         @Override
         public void afterEvent(Time time) {
-            time.scheduledEvents.add(new RecurringEvent(eventHandler, time.timeMilliSeconds + intervalMilliseconds, intervalMilliseconds));
+            this.timeMs=time.timeMilliSeconds+intervalMilliseconds;
+            time.scheduledEvents.add(this);
         }
     }
 
