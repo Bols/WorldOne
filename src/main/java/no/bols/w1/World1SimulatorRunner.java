@@ -46,11 +46,11 @@ public class World1SimulatorRunner<G> {
     private WorldScoreWithTrainingHistory runScenarioTrainingUntilStable(Time time, Brain brain) {
         WorldScoreWithTrainingHistory scoreList = new WorldScoreWithTrainingHistory(time, brain);
         do {
+            time.reset();
             Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, brain);
             time.runUntil(t -> time.timeSince(startTime) > scenarioTimeMs);
             scoreList.addScore(simulationWorld.score());
-            time.reset();
         } while (scoreList.lastScoreWasImprovement());
         return scoreList;
     }
@@ -89,20 +89,20 @@ public class World1SimulatorRunner<G> {
         Time time = new Time();
         time.gatherStats(true);
         Brain blankBrain = brainFactory.createBrain(time, score.getValue());
-        WorldScoreWithTrainingHistory rerunScoreList = new WorldScoreWithTrainingHistory(time, blankBrain);
+        WorldScoreWithTrainingHistory rerunScore = new WorldScoreWithTrainingHistory(time, blankBrain);
         Time.RecurringEvent graphEvent = null;
         do {
             Time.Instant startTime = time.getSimulatedTime();
             World simulationWorld = new World(time, blankBrain);
             Map<String, Double> oldValues = new HashMap<>();
             graphEvent = time.scheduleRecurringEvent(t -> {
-                jfxVisualize.addDataPoint("Position", rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
-                jfxVisualize.addDataPoint("Motoroutput", rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getLastMotorOutput());
-                jfxVisualize.addDataPoint("Food eaten",rerunScoreList.getHistory().size(),t.getSimulatedTime().ms(),simulationWorld.getFoodAmountEaten());
+                jfxVisualize.addDataPoint("Position", rerunScore.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getPosition());
+                jfxVisualize.addDataPoint("Motoroutput", rerunScore.getHistory().size(), t.getSimulatedTime().ms(), simulationWorld.getOneleg().getLastMotorOutput());
+                jfxVisualize.addDataPoint("Food eaten",rerunScore.getHistory().size(),t.getSimulatedTime().ms(),simulationWorld.getFoodAmountEaten());
                 for (Map.Entry<String, DoubleAdder> statEntry : time.getStats().entrySet()) {
                     Double previousValue = oldValues.get(statEntry.getKey());
                     double newValue = statEntry.getValue().doubleValue();
-                    jfxVisualize.addDataPoint(statEntry.getKey(), rerunScoreList.getHistory().size(), t.getSimulatedTime().ms(), newValue - (previousValue != null ? previousValue : 0));
+                    jfxVisualize.addDataPoint(statEntry.getKey(), rerunScore.getHistory().size(), t.getSimulatedTime().ms(), newValue - (previousValue != null ? previousValue : 0));
                     oldValues.put(statEntry.getKey(), newValue);
                 }
 
@@ -110,12 +110,14 @@ public class World1SimulatorRunner<G> {
             }, 100);
 
             time.runUntil(t -> t.timeSince(startTime) > scenarioTimeMs);
-            rerunScoreList.addScore(simulationWorld.score());
+            rerunScore.addScore(simulationWorld.score());
             time.unScheduleRecurringEvent(graphEvent);
             time.reset();
-        } while (rerunScoreList.lastScoreWasImprovement());
+        } while (rerunScore.lastScoreWasImprovement());
 
-        System.out.println("Visualization rerun :"+rerunScoreList.toString());
+        if(Math.abs(score.getKey().getScore()-rerunScore.getScore())>score.getKey().getScore()*.01){
+            throw new RuntimeException("Large difference between original and rerun-score, these should be very similar:"+score.getKey().getScore()+" vs "+rerunScore.getScore());
+        }
 
         for (Pair<Long, Double> longDoublePair : bestScoreHistory) {
             jfxVisualize.addDataPoint("Gene tuning best scoreValue", 0, longDoublePair.getKey(), longDoublePair.getValue());
@@ -131,7 +133,7 @@ public class World1SimulatorRunner<G> {
             throw new RuntimeException(e);
         }
         Platform.exit();
-        return rerunScoreList;
+        return rerunScore;
     }
 
 }

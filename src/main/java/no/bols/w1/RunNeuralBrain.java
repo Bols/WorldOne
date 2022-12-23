@@ -5,7 +5,6 @@ import javafx.util.Pair;
 import no.bols.w1.ai.BrainGene;
 import no.bols.w1.ai.NeuralBrainFactory;
 import no.bols.w1.genes.internal.GeneMap;
-import no.bols.w1.physics.Time;
 
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -18,6 +17,7 @@ public class RunNeuralBrain {
                 .brainFactory(new NeuralBrainFactory())
 
                 .build();
+        long startTime = System.currentTimeMillis();
         Pair<WorldScoreWithTrainingHistory, GeneMap> bestResult = simulator.runGeneticAlgorithmUntilStable();
         for(int i =0;i<10;i++){
             WorldScoreWithTrainingHistory rerunScore = simulator.createBrainAndRunScenarioUntilStable(bestResult.getValue());
@@ -28,15 +28,11 @@ public class RunNeuralBrain {
         Double topScore = bestResult.getKey().score().getScoreValue();
         System.out.println("----------- Result stats ----------------");
         System.out.println(bestResult.getKey());
-        System.out.println("Real-clock runtime:  " + bestResult.getKey().getTime().getRealClockRuntime());
-        System.out.println("Events handled: " + bestResult.getKey().getTime().getEventsHandled());
-        System.out.println("Stats: " + bestResult.getKey().getTime().getStats().entrySet().stream().map(e -> e.getKey() + ":" + e.getValue().doubleValue()).collect(Collectors.joining(",")));
+        System.out.println("Real-clock runtime for best simulation:  " + (bestResult.getKey().getTime().getRealClockRuntimeNs()/1000)/1000.0+"ms.  Events handled:"+bestResult.getKey().getTime().getEventsHandled());
+        System.out.println("Total runtime " + (System.currentTimeMillis()-startTime)+"ms");
 
-        WorldScoreWithTrainingHistory worldScoreWithTrainingHistory = simulator.rerunAndVisualize(bestResult);
+        simulator.rerunAndVisualize(bestResult);
 
-        System.out.println("Score " + topScore + " (visualization rerun: " + worldScoreWithTrainingHistory.score().getScoreValue() + ")");
-        if(Math.abs(topScore-worldScoreWithTrainingHistory.score().getScoreValue())>.1){
-            throw new RuntimeException("Large difference between original and rerun-score");
-        }
+
     }
 }

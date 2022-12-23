@@ -9,7 +9,6 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class Time {
-    public static int BATCH_SIZE = 1000;
     public static long eventid=0;
     private long timeMilliSeconds;
     private long iteration = 0;
@@ -18,7 +17,7 @@ public class Time {
     int eventsHandled;
     private List<RecurringEvent> recurringEventsList = new ArrayList<>();
     @Getter
-    private long realClockRuntime;
+    private long realClockRuntimeNs;
 
     private boolean gatherStats = false;
 
@@ -42,25 +41,23 @@ public class Time {
 
     public void runUntil(Predicate<Time> stopCriteria) {
         boolean timeOut = false;
-        long startClockTime = System.currentTimeMillis();
+        long startClockTime = System.nanoTime();
         if (scheduledEvents.isEmpty()) {
             throw new RuntimeException("No scheduled events. Simulation not initialized");
         }
         while (!stopCriteria.test(this) && !timeOut) {
-//            for (int i = 0; i < BATCH_SIZE; i++) {  //replace with thread
                 Event firstEvent = scheduledEvents.remove();
                 timeMilliSeconds = firstEvent.timeMs;
                 firstEvent.eventHandler.accept(this);     //TODO: eventhandler bør også inneholde en metode for å oppdatere tilstand til siste
                 firstEvent.afterEvent(this);
                 eventsHandled++;
-//            }
 //            long realtime = System.currentTimeMillis() - startClockTime;
 //            if (scheduledEvents.size() > 10000 || (realtime > 10000 && timeMilliSeconds < realtime)) {
 //                System.err.println("Scenario-run timeout. Realtime=" + realtime + ", simulated time=" + timeMilliSeconds + ", queuesize=" + scheduledEvents.size());
 //                timeOut = true;
 //            }
         }
-        realClockRuntime = System.currentTimeMillis() - startClockTime;
+        realClockRuntimeNs = System.nanoTime() - startClockTime;
 
         //System.out.print("Finished after " + eventsHandled + " events, simulated time passed " + String.format("%.2f", timeMilliSeconds / 1000f) + " real time passed " + (System.currentTimeMillis() - startClockTime) + "ms.");
     }
